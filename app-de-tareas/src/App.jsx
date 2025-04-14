@@ -1,13 +1,15 @@
 import "./App.css";
+import FormularioTarea from "./components/FormularioTarea";
 
-function App() {
+export default function App() {
   return (
     <>
       <div>
-        <h1>Proyecto base de la app de tareas</h1>
+        <h1 bg-green-500 text-white p-4>
+          Mis tareas
+        </h1>
+        <FormularioTarea />
       </div>
     </>
   );
 }
-
-export default App;
