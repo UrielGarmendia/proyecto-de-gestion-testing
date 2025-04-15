@@ -5,9 +5,7 @@ export default function App() {
   return (
     <>
       <div>
-        <h1 bg-green-500 text-white p-4>
-          Mis tareas
-        </h1>
+        <h2 class="text-3xl font-bold text-white">Mis Tareas</h2>
         <FormularioTarea />
       </div>
     </>
