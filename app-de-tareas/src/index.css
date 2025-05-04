@@ -1,19 +1,24 @@
 @import "tailwindcss";
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  background-color: #7f7a7a;
-}
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  font-family: "Inter", sans-serif;
+  background-color: #edebe6;
 }
-form {
-  background-color: transparent;
-  border: none;
+
+/* Estilos personalizados mínimos */
+.bg-blue-500 {
+  background-color: rgb(141, 207, 202);
+}
+
+.hover\:bg-blue-600:hover {
+  background-color: #51cfc9;
+}
+
+.focus\:ring-blue-500 {
+  --tw-ring-color: rgb(71, 212, 201);
+}
+
+.completed {
+  text-decoration: line-through;
+  color: gray;
 }
