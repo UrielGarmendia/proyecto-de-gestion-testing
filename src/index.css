@@ -21,3 +21,7 @@ body {
   text-decoration: line-through;
   color: gray;
 }
+
+::-webkit-scrollbar {
+  display: none;
+}
