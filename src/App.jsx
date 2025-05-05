@@ -3,30 +3,30 @@ import Header from "./components/Header";
 import TaskForm from "./components/TaskForm";
 import FilterButtons from "./components/FilterButton";
 import TaskList from "./components/TaskList";
+let miStorage = window.localStorage;
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [filter, setFilter] = useState("all");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
-  // //lee las tareas al abrir
-  // useEffect(() => {
-  //   const storedTasks = localStorage.getItem("tasks");
-  //   if (storedTasks) {
-  //     setTasks(JSON.parse(storedTasks));
-  //   }
-  // }, []);
-  // localStorage.setItem("prueba", "funciona");
-  // localStorage.getItem("prueba");
+  // lee de localStorage una sola vez
+  useEffect(() => {
+    const storedTasks = miStorage.getItem("tasks");
+    if (storedTasks) {
+      setTasks(JSON.parse(storedTasks));
+    }
+    setHasLoaded(true);
+  }, []);
 
-  // //guarda las tareas
-  // useEffect(() => {
-  //   console.log(JSON.stringify(tasks));
-
-  //   localStorage.setItem("tasks", JSON.stringify(tasks));
-  //   console.log("Guardando en localStorage:", tasks);
-  // }, [tasks]);
+  // guarda en localStorage despues de cargar
+  useEffect(() => {
+    if (hasLoaded) {
+      miStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+  }, [tasks, hasLoaded]);
 
   //crea la tarea
   const addTask = (newTask) => {
@@ -66,7 +66,7 @@ function App() {
   });
 
   return (
-    <div className="min-h-screen p-2 flex flex-col items-start bg-[#edebe6]">
+    <div className="min-h-screen p-3 flex flex-col items-start bg-[#edebe6]">
       <Header
         isLoggedIn={isLoggedIn}
         toggleLogin={() => setIsLoggedIn(!isLoggedIn)}
