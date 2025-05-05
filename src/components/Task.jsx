@@ -37,7 +37,7 @@ export default function Task({
               onClick={() => toggleTaskDetails(task.id)}
               style={{ cursor: "pointer" }}
             >
-              {task.text}
+              {task.title}
             </span>
           </div>
         </td>
@@ -52,7 +52,8 @@ export default function Task({
           </div>
         </td>
         <td className="p-2 text-sm">{task.category}</td>
-        <td className="p-2 text-sm">{task.dueDate || "-"}</td>
+        <td className="p-2 text-sm">{task.date || "-"}</td>
+        <td className="p-2 text-sm">{task.time || "-"}</td>
         <td className="p-2 text-sm">
           <span
             className={`px-2 py-1 rounded-full text-xs ${
@@ -88,7 +89,7 @@ export default function Task({
               <FaPen size={12} />
             </button>
             <button
-              onClick={() => handleAddSubtask(task.id)} // Abrir/cerrar el menú
+              onClick={() => handleAddSubtask(task.id)}
               className="p-1 text-gray-600 hover:text-green-600"
               title="Añadir subtarea"
             >

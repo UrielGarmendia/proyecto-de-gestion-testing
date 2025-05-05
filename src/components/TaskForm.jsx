@@ -2,67 +2,140 @@ import { useEffect, useState } from "react";
 import { FaPen, FaPlus } from "react-icons/fa";
 
 const TaskForm = ({ addTask, taskToEdit, handleEditTask, setTaskToEdit }) => {
-  const [taskText, setTaskText] = useState("");
+  const [title, setTitle] = useState("");
   const [priority, setPriority] = useState("baja");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [category, setCategory] = useState("general");
-  const [notes, setNotes] = useState("");
+  const [category, setCategory] = useState("General");
+  const [description, setDescription] = useState("");
+  const [errors, setErrors] = useState({
+    title: "",
+    date: "",
+    time: "",
+    description: "",
+  });
 
   useEffect(() => {
     if (taskToEdit) {
-      setTaskText(taskToEdit.text);
+      setTitle(taskToEdit.title);
       setPriority(taskToEdit.priority);
       setDate(taskToEdit.date);
       setTime(taskToEdit.time);
       setCategory(taskToEdit.category);
-      setNotes(taskToEdit.notes);
+      setDescription(taskToEdit.description);
     } else {
-      setTaskText("");
+      setTitle("");
       setPriority("baja");
       setDate("");
       setTime("");
-      setCategory("general");
-      setNotes("");
+      setCategory("General");
+      setDescription("");
     }
   }, [taskToEdit]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "title") {
+      const regex = /^[\w\s.,!?¡¿()áéíóúÁÉÍÓÚñÑ-]*$/;
+
+      setTitle(value);
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: !value.trim()
+          ? "Por favor, ingresa una tarea."
+          : !regex.test(value)
+          ? "El título contiene caracteres no permitidos."
+          : "",
+      }));
+    } else if (name === "description") {
+      if (value.length <= 20) {
+        setDescription(value);
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          description: "",
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          description: "Máximo 20 caracteres.",
+        }));
+      }
+    } else if (name === "date") {
+      setDate(value);
+      setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
+    } else if (name === "time") {
+      setTime(value);
+      setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
+    } else {
+      if (name === "priority") setPriority(value);
+      if (name === "category") setCategory(value);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!taskText.trim()) {
-      alert("Por favor, ingresa una tarea.");
+    let isValid = true;
+    const newErrors = { ...errors };
+
+    if (!title.trim()) {
+      newErrors.title = "Ingresa una tarea";
+      isValid = false;
+    } else {
+      const regex = /^[\w\s.,!?¡¿()áéíóúÁÉÍÓÚñÑ-]*$/;
+      if (!regex.test(title)) {
+        newErrors.title = "El título contiene caracteres no permitidos.";
+        isValid = false;
+      }
+    }
+
+    if (date && time) {
+      const now = new Date();
+      const selectedDateTime = new Date(`${date}T${time}`);
+
+      if (selectedDateTime < now) {
+        newErrors.date = "La fecha y hora deben ser posteriores a la actual";
+        newErrors.time = "La fecha y hora deben ser posteriores a la actual";
+        isValid = false;
+      } else {
+        newErrors.date = "";
+        newErrors.time = "";
+      }
+    }
+
+    setErrors(newErrors);
+
+    if (!isValid) {
       return;
     }
 
     const newTask = {
       id: taskToEdit ? taskToEdit.id : Date.now(),
-      text: taskText,
+      title: title,
       priority,
       date,
       time,
       category,
-      notes,
+      description,
       completed: taskToEdit ? taskToEdit.completed : false,
       subtasks: taskToEdit ? taskToEdit.subtasks : [],
     };
 
-    //me verifica si el formulario se usa para crear o editar
     if (taskToEdit) {
       handleEditTask(newTask);
-      setTaskToEdit(null); // ahora sí, bien puesto
+      setTaskToEdit(null);
     } else {
       addTask(newTask);
     }
 
-    // verifica que no este editando y resetea el formulario
     if (!taskToEdit) {
-      setTaskText("");
+      setTitle("");
       setPriority("baja");
       setDate("");
       setTime("");
-      setCategory("general");
-      setNotes("");
+      setCategory("General");
+      setDescription("");
     }
 
     if (taskToEdit) {
@@ -72,16 +145,25 @@ const TaskForm = ({ addTask, taskToEdit, handleEditTask, setTaskToEdit }) => {
 
   return (
     <form onSubmit={handleSubmit} className="mb-4 space-y-4">
-      <input
-        type="text"
-        value={taskText}
-        onChange={(e) => setTaskText(e.target.value)}
-        placeholder="Añade una nueva tarea..."
-        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm"
-      />
+      <div>
+        <input
+          type="text"
+          name="title"
+          value={title}
+          onChange={handleInputChange}
+          placeholder="Añade una nueva tarea..."
+          className={`w-full p-3 rounded-lg border ${
+            errors.title ? "border-red-500" : "border-gray-300"
+          } focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm`}
+        />
+        {errors.title && (
+          <p className="text-red-500 text-xs italic">{errors.title}</p>
+        )}
+      </div>
       <select
         value={priority}
-        onChange={(e) => setPriority(e.target.value)}
+        onChange={handleInputChange}
+        name="priority"
         className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm"
       >
         <option value="baja">Prioridad Baja</option>
@@ -89,37 +171,62 @@ const TaskForm = ({ addTask, taskToEdit, handleEditTask, setTaskToEdit }) => {
         <option value="alta">Prioridad Alta</option>
       </select>
       <div className="flex space-x-2 w-full">
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="w-1/2 p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm"
-        />
-        <input
-          type="time"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          className="w-1/2 p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm"
-        />
+        <div className="w-1/2">
+          <input
+            type="date"
+            name="date"
+            value={date}
+            onChange={handleInputChange}
+            className={`w-full p-2 rounded-lg border ${
+              errors.date ? "border-red-500" : "border-gray-300"
+            } focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm`}
+          />
+          {errors.date && (
+            <p className="text-red-500 text-xs italic text-xs mt-1">
+              {errors.date}
+            </p>
+          )}
+        </div>
+        <div className="w-1/2">
+          <input
+            type="time"
+            name="time"
+            value={time}
+            onChange={handleInputChange}
+            className={`w-full p-2 rounded-lg border ${
+              errors.time ? "border-red-500" : "border-gray-300"
+            } focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm`}
+          />
+          {errors.time && (
+            <p className="text-red-500 text-xs italic text-xs mt-1">
+              {errors.time}
+            </p>
+          )}
+        </div>
       </div>
       <select
         value={category}
-        onChange={(e) => setCategory(e.target.value)}
+        onChange={handleInputChange}
+        name="category"
         className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm"
       >
-        <option value="general">General</option>
-        <option value="trabajo">Trabajo</option>
-        <option value="personal">Personal</option>
-        <option value="hogar">Hogar</option>
-        <option value="otros">Otros</option>
+        <option value="General">General</option>
+        <option value="Trabajo">Trabajo</option>
+        <option value="Personal">Personal</option>
+        <option value="Hogar">Hogar</option>
+        <option value="Otros">Otros</option>
       </select>
       <textarea
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
+        value={description}
+        onChange={handleInputChange}
+        name="description"
         placeholder="Añade notas a la tarea..."
         className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm"
         rows="3"
       ></textarea>
+      {errors.description && (
+        <p className="text-red-500 text-xs italic mt-1">{errors.description}</p>
+      )}
       <button
         type="submit"
         className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-300 text-sm"

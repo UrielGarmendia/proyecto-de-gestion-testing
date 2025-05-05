@@ -77,10 +77,11 @@ const TaskList = ({
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-100 text-left">
-              <th className="p-2 border-b text-sm">Tarea</th>{" "}
+              <th className="p-2 border-b text-sm">Tarea</th>
               <th className="p-2 border-b text-sm">Prioridad</th>
               <th className="p-2 border-b text-sm">Categoría</th>
               <th className="p-2 border-b text-sm">Fecha Límite</th>
+              <th className="p-2 border-b text-sm">Hora Límite</th>
               <th className="p-2 border-b text-sm">Estado</th>
               <th className="p-2 border-b text-sm">Acciones</th>
             </tr>
