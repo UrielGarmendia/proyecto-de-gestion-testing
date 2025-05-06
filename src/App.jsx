@@ -59,11 +59,34 @@ function App() {
     );
   };
 
-  //filtra las tareas
-  const filteredTasks = tasks.filter((task) => {
-    if (filter === "all") return true;
-    return task.priority === filter;
-  });
+  const filteredTasks = tasks
+    .filter((task) => {
+      if (filter === "all") return true;
+
+      if (filter === "recent") {
+        if (task.completed) return false;
+        if (!task.date) return false; // Si no tiene fecha, no puede vencerse
+
+        // Si no hay hora, asumimos 00:00
+        const fullTime = task.time ? task.time : "00:00";
+        const taskDateTime = new Date(`${task.date}T${fullTime}`);
+        const now = new Date();
+
+        return taskDateTime >= now;
+      }
+
+      return task.priority === filter;
+    })
+    .sort((a, b) => {
+      if (filter === "recent") {
+        const timeA = a.time ? a.time : "00:00";
+        const timeB = b.time ? b.time : "00:00";
+        const dateA = new Date(`${a.date}T${timeA}`);
+        const dateB = new Date(`${b.date}T${timeB}`);
+        return dateA - dateB;
+      }
+      return 0;
+    });
 
   return (
     <div className="min-h-screen p-3 flex flex-col items-start bg-[#edebe6]">

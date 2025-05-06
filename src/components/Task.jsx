@@ -13,6 +13,13 @@ export default function Task({
   handleSubtaskSubmit,
   handleAddSubtask,
 }) {
+  //funcion que le da formato a la fecha
+  const formatDateToDisplay = (time) => {
+    if (!time) return "";
+    const [year, month, day] = time.split("-"); //me divide la fecha
+    return `${parseInt(day)}/${parseInt(month)}/${year}`;
+  };
+
   return (
     <>
       <tr
@@ -52,8 +59,10 @@ export default function Task({
           </div>
         </td>
         <td className="p-2 text-sm">{task.category}</td>
-        <td className="p-2 text-sm">{task.date || "-"}</td>
-        <td className="p-2 text-sm">{task.time || "-"}</td>
+        <td className="p-2 text-sm">
+          {formatDateToDisplay(task.date) || "Sin fecha límite"}
+        </td>
+        <td className="p-2 text-sm">{task.time || "Sin hora límite"}</td>
         <td className="p-2 text-sm">
           <span
             className={`px-2 py-1 rounded-full text-xs ${
