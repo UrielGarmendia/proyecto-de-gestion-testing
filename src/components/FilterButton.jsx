@@ -4,7 +4,6 @@ const FilterButtons = ({ filter, setFilter }) => {
     { value: "baja", label: "Baja" },
     { value: "media", label: "Media" },
     { value: "alta", label: "Alta" },
-    { value: "recent", label: "Vencen pronto" },
   ];
 
   return (
