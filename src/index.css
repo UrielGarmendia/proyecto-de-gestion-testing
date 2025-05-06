@@ -22,6 +22,6 @@ body {
   color: gray;
 }
 
-::-webkit-scrollbar {
-  display: none;
-}
+/* ::-webkit-scrollbar {
+  background-color: tra;
+} */

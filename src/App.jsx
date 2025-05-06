@@ -72,9 +72,9 @@ function App() {
         toggleLogin={() => setIsLoggedIn(!isLoggedIn)}
       />
 
-      <div className="w-full flex flex-col md:flex-row items-start gap-4 px-4">
-        <div className=" md:w-1/3 ">
-          <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-200 ">
+      <div className="w-full flex flex-col md:flex-row items-start gap-4 px-3 ">
+        <div className=" md:w-1/3">
+          <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-200 h-[500px]">
             <TaskForm
               addTask={addTask}
               taskToEdit={taskToEdit}
@@ -83,8 +83,8 @@ function App() {
             />
           </div>
         </div>
-        <div className="flex-1">
-          <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-200">
+        <div className="flex-1 ">
+          <div className="bg-white rounded-xl h-[500px] shadow-lg p-4 border border-gray-200">
             <FilterButtons filter={filter} setFilter={setFilter} />
             <TaskList
               tasks={filteredTasks}

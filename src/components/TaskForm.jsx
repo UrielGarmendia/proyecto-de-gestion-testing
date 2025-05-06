@@ -79,6 +79,7 @@ const TaskForm = ({ addTask, taskToEdit, handleEditTask, setTaskToEdit }) => {
     let isValid = true;
     const newErrors = { ...errors };
 
+    //validacion del titulo
     if (!title.trim()) {
       newErrors.title = "Ingresa una tarea";
       isValid = false;
@@ -90,18 +91,39 @@ const TaskForm = ({ addTask, taskToEdit, handleEditTask, setTaskToEdit }) => {
       }
     }
 
-    if (date && time) {
-      const now = new Date();
-      const selectedDateTime = new Date(`${date}T${time}`);
+    // validacion de la fecha y la hora
+    const now = new Date();
 
-      if (selectedDateTime < now) {
-        newErrors.date = "La fecha y hora deben ser posteriores a la actual";
-        newErrors.time = "La fecha y hora deben ser posteriores a la actual";
+    if (time && !date) {
+      newErrors.date = "Se debe ingresar una fecha también";
+      newErrors.time = "La hora sin fecha es inválida";
+      isValid = false;
+    } else if (date && !time) {
+      const selectedDate = new Date(`${date}T00:00:00`);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (selectedDate < today) {
+        newErrors.date = "La fecha debe ser de hoy en adelante";
         isValid = false;
       } else {
         newErrors.date = "";
         newErrors.time = "";
       }
+    } else if (date && time) {
+      const selectedDateTime = new Date(`${date}T${time}`);
+
+      if (selectedDateTime <= now) {
+        newErrors.date = "La fecha y hora deben ser futuras.";
+        newErrors.time = "La fecha y hora deben ser futuras.";
+        isValid = false;
+      } else {
+        newErrors.date = "";
+        newErrors.time = "";
+      }
+    } else {
+      newErrors.date = "";
+      newErrors.time = "";
     }
 
     setErrors(newErrors);
@@ -144,8 +166,8 @@ const TaskForm = ({ addTask, taskToEdit, handleEditTask, setTaskToEdit }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mb-4 space-y-4">
-      <div>
+    <form onSubmit={handleSubmit} className="space-y-4 w-full">
+      <div className="w-full">
         <input
           type="text"
           name="title"
@@ -182,9 +204,7 @@ const TaskForm = ({ addTask, taskToEdit, handleEditTask, setTaskToEdit }) => {
             } focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm`}
           />
           {errors.date && (
-            <p className="text-red-500 text-xs italic text-xs mt-1">
-              {errors.date}
-            </p>
+            <p className="text-red-500 text-xs italic mt-1">{errors.date}</p>
           )}
         </div>
         <div className="w-1/2">
@@ -198,9 +218,7 @@ const TaskForm = ({ addTask, taskToEdit, handleEditTask, setTaskToEdit }) => {
             } focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm`}
           />
           {errors.time && (
-            <p className="text-red-500 text-xs italic text-xs mt-1">
-              {errors.time}
-            </p>
+            <p className="text-red-500 text-xs italic mt-1">{errors.time}</p>
           )}
         </div>
       </div>
@@ -221,7 +239,7 @@ const TaskForm = ({ addTask, taskToEdit, handleEditTask, setTaskToEdit }) => {
         onChange={handleInputChange}
         name="description"
         placeholder="Añade notas a la tarea..."
-        className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm"
+        className="resize-none w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm"
         rows="3"
       ></textarea>
       {errors.description && (

@@ -12,6 +12,19 @@ const TaskList = ({
   const [subtaskInputs, setSubtaskInputs] = useState({});
   const [expandedTasks, setExpandedTasks] = useState({});
 
+  // totales de tareas
+  const totalTasks = tasks.length;
+
+  // total de completas
+  const completedTasks = tasks.filter((tarea) => tarea.completed);
+  const totalCompleted = completedTasks.length;
+  // total de pendientes
+  const totalPending = totalTasks - totalCompleted;
+
+  //funcion que calcula el porcentaje para la barra
+  const completionPercentage =
+    totalTasks === 0 ? 0 : Math.round((totalCompleted / totalTasks) * 100);
+
   const getPriorityColor = (priority) => {
     switch (priority) {
       case "alta":
@@ -47,7 +60,6 @@ const TaskList = ({
       console.log(
         `Subtarea añadida a la tarea ${taskId}: ${subtaskInputs[taskId]}`
       );
-      // hacer logica de la subtarea
       setSubtaskInputs({
         ...subtaskInputs,
         [taskId]: "",
@@ -63,54 +75,81 @@ const TaskList = ({
   };
 
   return (
-    <div className="w-full">
-      <div className="flex justify-between items-start mb-4 flex-col sm:flex-row sm:items-center">
-        <h2 className="text-xl font-semibold mb-2 sm:mb-0">Tareas Agregadas</h2>
-        <button
-          onClick={clearCompletedTasks}
-          className="bg-gray-200 hover:bg-gray-300 px-3 py-2 rounded-lg flex items-center"
-        >
-          <FaTrashAlt className="mr-2" /> Limpiar completadas
-        </button>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-100 text-left">
-              <th className="p-2 border-b text-sm">Tarea</th>
-              <th className="p-2 border-b text-sm">Prioridad</th>
-              <th className="p-2 border-b text-sm">Categoría</th>
-              <th className="p-2 border-b text-sm">Fecha Límite</th>
-              <th className="p-2 border-b text-sm">Hora Límite</th>
-              <th className="p-2 border-b text-sm">Estado</th>
-              <th className="p-2 border-b text-sm">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tasks.map((task) => (
-              <Task
-                key={task.id}
-                task={task}
-                toggleComplete={toggleComplete}
-                toggleTaskDetails={toggleTaskDetails}
-                getPriorityColor={getPriorityColor}
-                deleteTask={deleteTask}
-                setTaskToEdit={setTaskToEdit}
-                handleAddSubtask={handleAddSubtask}
-                expandedTasks={expandedTasks}
-                subtaskInputs={subtaskInputs}
-                handleSubtaskChange={handleSubtaskChange}
-                handleSubtaskSubmit={handleSubtaskSubmit}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {tasks.length === 0 && (
-        <div className="text-center py-6 text-gray-500 text-sm">
-          No hay tareas agregadas aún
+    <div className="w-full space-y-4">
+      {/* header */}
+      <div className="flex flex-wrap justify-between items-center gap-3">
+        <h2 className="text-lg font-semibold">Tareas Agregadas</h2>
+        <div className="flex items-center gap-4 text-sm">
+          <span>
+            Creadas: <b>{totalTasks}</b>
+          </span>
+          <span className="text-green-600">
+            Completadas: <b>{totalCompleted}</b>
+          </span>
+          <span className="text-blue-600">
+            Pendientes: <b>{totalPending}</b>
+          </span>
+          <button
+            onClick={clearCompletedTasks}
+            className="flex items-center gap-1 text-red-500 hover:text-red-700 text-sm"
+          >
+            <FaTrashAlt size={12} /> Limpiar completas
+          </button>
         </div>
-      )}
+      </div>
+      {/*  barra de progreso */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 bg-gray-200 rounded-full h-2">
+          <div
+            className={`h-2 rounded-full ${
+              completionPercentage < 50
+                ? "bg-red-400"
+                : completionPercentage < 80
+                ? "bg-yellow-400"
+                : "bg-green-500"
+            }`}
+            style={{ width: `${completionPercentage}%` }}
+          />
+        </div>
+        <span className="text-sm text-gray-600">{completionPercentage}%</span>
+      </div>
+
+      {/* tabla de tareas */}
+      <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <div className="overflow-y-auto max-h-[332px]">
+          <table className="w-full">
+            <thead className="bg-gray-50 sticky top-0">
+              <tr className="text-left text-sm text-gray-600">
+                <th className="p-3 border-b">Tarea</th>
+                <th className="p-3 border-b">Prioridad</th>
+                <th className="p-3 border-b">Categoría</th>
+                <th className="p-3 border-b">Fecha</th>
+                <th className="p-3 border-b">Hora</th>
+                <th className="p-3 border-b">Estado</th>
+                <th className="p-3 border-b">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tasks.map((task) => (
+                <Task
+                  key={task.id}
+                  task={task}
+                  toggleComplete={toggleComplete}
+                  toggleTaskDetails={toggleTaskDetails}
+                  getPriorityColor={getPriorityColor}
+                  deleteTask={deleteTask}
+                  setTaskToEdit={setTaskToEdit}
+                  handleAddSubtask={handleAddSubtask}
+                  expandedTasks={expandedTasks}
+                  subtaskInputs={subtaskInputs}
+                  handleSubtaskChange={handleSubtaskChange}
+                  handleSubtaskSubmit={handleSubtaskSubmit}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
