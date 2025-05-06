@@ -44,21 +44,21 @@ const TaskForm = ({ addTask, taskToEdit, handleEditTask, setTaskToEdit }) => {
         ...prevErrors,
         [name]: !value.trim()
           ? "Por favor, ingresa una tarea."
-          : !regex.test(value)
+          : !regex.test(value) //validacion del titulo
           ? "El título contiene caracteres no permitidos."
           : "",
       }));
     } else if (name === "description") {
-      if (value.length <= 20) {
+      if (value.length <= 40) {
         setDescription(value);
         setErrors((prevErrors) => ({
           ...prevErrors,
           description: "",
-        }));
+        })); //validacion de la descripcion
       } else {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          description: "Máximo 20 caracteres.",
+          description: "Máximo 40 caracteres.",
         }));
       }
     } else if (name === "date") {

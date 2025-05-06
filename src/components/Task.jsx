@@ -13,6 +13,10 @@ export default function Task({
   handleSubtaskSubmit,
   handleAddSubtask,
 }) {
+  {
+    console.log(task);
+  }
+
   //funcion que le da formato a la fecha
   const formatDateToDisplay = (time) => {
     if (!time) return "";
@@ -111,13 +115,13 @@ export default function Task({
         <tr className="border-b">
           <td colSpan="6" className="p-2 bg-gray-50">
             <div className="pl-6">
-              {task.notes && (
+              {task.description && (
                 <div className="mb-2">
                   <h4 className="font-medium text-gray-700 mb-1 text-sm">
                     Descripción:
                   </h4>
                   <p className="text-xs text-gray-600 whitespace-pre-line">
-                    {task.notes}
+                    {task.description}
                   </p>
                 </div>
               )}
