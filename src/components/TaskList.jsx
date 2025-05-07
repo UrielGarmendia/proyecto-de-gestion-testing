@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import Task from "./Task";
 
@@ -24,6 +24,31 @@ const TaskList = ({
   //funcion que calcula el porcentaje para la barra
   const completionPercentage =
     totalTasks === 0 ? 0 : Math.round((totalCompleted / totalTasks) * 100);
+
+  const [displayedPercentage, setDisplayedPercentage] =
+    useState(completionPercentage);
+
+  useEffect(() => {
+    const difference = completionPercentage - displayedPercentage;
+    if (difference === 0) return;
+
+    const step = difference > 0 ? 1 : -1;
+    const interval = setInterval(() => {
+      setDisplayedPercentage((prev) => {
+        const next = prev + step;
+        if (
+          (step > 0 && next >= completionPercentage) ||
+          (step < 0 && next <= completionPercentage)
+        ) {
+          clearInterval(interval);
+          return completionPercentage;
+        }
+        return next;
+      });
+    }, 5);
+
+    return () => clearInterval(interval);
+  }, [completionPercentage, displayedPercentage]);
 
   const getPriorityColor = (priority) => {
     switch (priority) {
@@ -101,7 +126,7 @@ const TaskList = ({
       <div className="flex items-center gap-3">
         <div className="flex-1 bg-gray-200 rounded-full h-2">
           <div
-            className={`h-2 rounded-full ${
+            className={`h-2 rounded-full transition-width duration-500 ease-in-out ${
               completionPercentage < 50
                 ? "bg-red-400"
                 : completionPercentage < 80
@@ -111,7 +136,7 @@ const TaskList = ({
             style={{ width: `${completionPercentage}%` }}
           />
         </div>
-        <span className="text-sm text-gray-600">{completionPercentage}%</span>
+        <span className="text-sm text-gray-600">{displayedPercentage}%</span>
       </div>
 
       {/* tabla de tareas */}

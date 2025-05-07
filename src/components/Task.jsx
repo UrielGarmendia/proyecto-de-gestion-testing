@@ -13,10 +13,6 @@ export default function Task({
   handleSubtaskSubmit,
   handleAddSubtask,
 }) {
-  {
-    console.log(task);
-  }
-
   //funcion que le da formato a la fecha
   const formatDateToDisplay = (time) => {
     if (!time) return "";

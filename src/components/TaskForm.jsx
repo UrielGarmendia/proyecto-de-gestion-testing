@@ -49,16 +49,17 @@ const TaskForm = ({ addTask, taskToEdit, handleEditTask, setTaskToEdit }) => {
           : "",
       }));
     } else if (name === "description") {
-      if (value.length <= 40) {
+      //validacion de la descripcion
+      if (value.length <= 100) {
         setDescription(value);
         setErrors((prevErrors) => ({
           ...prevErrors,
           description: "",
-        })); //validacion de la descripcion
+        }));
       } else {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          description: "Máximo 40 caracteres.",
+          description: "Máximo 100 caracteres.",
         }));
       }
     } else if (name === "date") {
@@ -238,7 +239,7 @@ const TaskForm = ({ addTask, taskToEdit, handleEditTask, setTaskToEdit }) => {
         value={description}
         onChange={handleInputChange}
         name="description"
-        placeholder="Añade notas a la tarea..."
+        placeholder="Añade una descripción a la tarea..."
         className="resize-none w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm"
         rows="3"
       ></textarea>
