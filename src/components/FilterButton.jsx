@@ -1,4 +1,4 @@
-const FilterButtons = ({ filter, setFilter }) => {
+const FilterButtons = ({ filter, setFilter, isMobile }) => {
   const filters = [
     { value: "all", label: "Todas" },
     { value: "baja", label: "Baja" },
@@ -7,24 +7,45 @@ const FilterButtons = ({ filter, setFilter }) => {
     { value: "recent", label: "Más reciente" },
   ];
 
+  const handleSelectChange = (e) => {
+    setFilter(e.target.value);
+  };
+
   return (
-    <div className="mb-4">
-      <div className="flex space-x-2">
-        {filters.map((f) => (
-          <button
-            key={f.value}
-            onClick={() => setFilter(f.value)}
-            className={`filter-btn font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50 transition duration-300 ease-in-out ${
-              filter === f.value
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-gray-500 dark:text-white dark:hover:bg-gray-400"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-    </div>
+    <>
+      {isMobile ? (
+        <select
+          value={filter}
+          onChange={handleSelectChange}
+          name="filter"
+          className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm"
+        >
+          {filters.map((f) => (
+            <option key={f.value} value={f.value}>
+              {f.label}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <div className="mb-4">
+          <div className="flex space-x-2">
+            {filters.map((f) => (
+              <button
+                key={f.value}
+                onClick={() => setFilter(f.value)}
+                className={`filter-btn font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50 transition duration-300 ease-in-out ${
+                  filter === f.value
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-gray-500 dark:text-white dark:hover:bg-gray-400"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

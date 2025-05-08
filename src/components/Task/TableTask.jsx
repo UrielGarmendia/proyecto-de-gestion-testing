@@ -1,6 +1,13 @@
-import { FaTrashAlt, FaPlus, FaCheck, FaRedo, FaPen } from "react-icons/fa";
-
-export default function Task({
+import {
+  FaChevronDown,
+  FaChevronUp,
+  FaCheck,
+  FaPlus,
+  FaTrashAlt,
+  FaPen,
+  FaRedo,
+} from "react-icons/fa";
+const TableTask = ({
   task,
   toggleComplete,
   toggleTaskDetails,
@@ -11,12 +18,10 @@ export default function Task({
   subtaskInputs,
   handleSubtaskChange,
   handleSubtaskSubmit,
-  handleAddSubtask,
-}) {
-  //funcion que le da formato a la fecha
+}) => {
   const formatDateToDisplay = (time) => {
     if (!time) return "";
-    const [year, month, day] = time.split("-"); //me divide la fecha
+    const [year, month, day] = time.split("-");
     return `${parseInt(day)}/${parseInt(month)}/${year}`;
   };
 
@@ -33,14 +38,12 @@ export default function Task({
               type="checkbox"
               checked={task.completed}
               onChange={() => toggleComplete(task.id)}
-              className="mr-2 rounded-md text-blue-500 focus:ring-blue-500 h-4 w-4"
+              className="mr-2 rounded text-blue-500 focus:ring-blue-500 h-4 w-4"
             />
             <span
-              className={
-                task.completed
-                  ? "line-through text-gray-400 text-sm"
-                  : "text-sm"
-              }
+              className={`text-sm ${
+                task.completed ? "line-through text-gray-400" : ""
+              }`}
               onClick={() => toggleTaskDetails(task.id)}
               style={{ cursor: "pointer" }}
             >
@@ -60,9 +63,9 @@ export default function Task({
         </td>
         <td className="p-2 text-sm">{task.category}</td>
         <td className="p-2 text-sm">
-          {formatDateToDisplay(task.date) || "Sin fecha límite"}
+          {formatDateToDisplay(task.date) || "Sin fecha"}
         </td>
-        <td className="p-2 text-sm">{task.time || "Sin hora límite"}</td>
+        <td className="p-2 text-sm">{task.time || "Sin hora"}</td>
         <td className="p-2 text-sm">
           <span
             className={`px-2 py-1 rounded-full text-xs ${
@@ -98,18 +101,22 @@ export default function Task({
               <FaPen size={12} />
             </button>
             <button
-              onClick={() => handleAddSubtask(task.id)}
+              onClick={() => toggleTaskDetails(task.id)}
               className="p-1 text-gray-600 hover:text-green-600"
-              title="Añadir subtarea"
+              title="Detalles"
             >
-              <FaPlus size={12} />
+              {expandedTasks[task.id] ? (
+                <FaChevronUp size={12} />
+              ) : (
+                <FaChevronDown size={12} />
+              )}
             </button>
           </div>
         </td>
       </tr>
       {expandedTasks[task.id] && (
         <tr className="border-b">
-          <td colSpan="6" className="p-2 bg-gray-50">
+          <td colSpan="7" className="p-2 bg-gray-50">
             <div className="pl-6">
               {task.description && (
                 <div className="mb-2">
@@ -136,7 +143,7 @@ export default function Task({
                     onClick={() => handleSubtaskSubmit(task.id)}
                     className="ml-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-2 rounded-lg text-xs"
                   >
-                    Agregar
+                    <FaPlus size={10} /> Agregar
                   </button>
                 </div>
               </div>
@@ -154,4 +161,6 @@ export default function Task({
       )}
     </>
   );
-}
+};
+
+export default TableTask;

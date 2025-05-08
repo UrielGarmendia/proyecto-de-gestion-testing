@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import TaskForm from "./components/TaskForm";
 import FilterButtons from "./components/FilterButton";
 import TaskList from "./components/TaskList";
+
 let miStorage = window.localStorage;
 
 function App() {
@@ -11,6 +12,19 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState(null);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showForm, setShowForm] = useState(true); // controla la visibilidad del formulario en el celu
+
+  // detecta si es celular
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      setShowForm(false);
+    };
+    checkIfMobile();
+    window.addEventListener("resize", checkIfMobile);
+    return () => window.removeEventListener("resize", checkIfMobile);
+  }, []);
 
   // lee de localStorage una sola vez
   useEffect(() => {
@@ -19,6 +33,16 @@ function App() {
       setTasks(JSON.parse(storedTasks));
     }
     setHasLoaded(true);
+
+    // Listener para ajustar la interfaz cuando cambia el tamaño de pantalla
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setShowForm(true);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // guarda en localStorage despues de cargar
@@ -31,6 +55,10 @@ function App() {
   //crea la tarea
   const addTask = (newTask) => {
     setTasks([...tasks, newTask]);
+    // En móvil, mostrar la lista después de agregar una tarea
+    if (window.innerWidth < 768) {
+      setShowForm(false);
+    }
   };
 
   //borra la tarea
@@ -57,24 +85,24 @@ function App() {
     setTasks((prev) =>
       prev.map((task) => (task.id === updatedTask.id ? updatedTask : task))
     );
+    // en el celu vuelve a la lista despues de editarla
+    if (window.innerWidth < 768) {
+      setShowForm(false);
+    }
   };
 
   const filteredTasks = tasks
     .filter((task) => {
       if (filter === "all") return true;
-
       if (filter === "recent") {
         if (task.completed) return false;
-        if (!task.date) return false; // Si no tiene fecha, no puede vencerse
-
-        // Si no hay hora, asumimos 00:00
+        if (!task.date) return false; // si no hay fecha no se vence
+        // se establece como 00:00 si no hay hora
         const fullTime = task.time ? task.time : "00:00";
         const taskDateTime = new Date(`${task.date}T${fullTime}`);
         const now = new Date();
-
         return taskDateTime >= now;
       }
-
       return task.priority === filter;
     })
     .sort((a, b) => {
@@ -88,33 +116,78 @@ function App() {
       return 0;
     });
 
+  // alterna entre formulario y lista en el celu
+  const toggleFormView = () => {
+    setShowForm(!showForm);
+  };
+
   return (
-    <div className="min-h-screen p-3 flex flex-col items-start bg-[#edebe6]">
+    <div className="min-h-screen p-2 md:p-3 flex flex-col items-start bg-[#edebe6]">
       <Header
         isLoggedIn={isLoggedIn}
         toggleLogin={() => setIsLoggedIn(!isLoggedIn)}
       />
 
-      <div className="w-full flex flex-col md:flex-row items-start gap-4 px-3 ">
-        <div className=" md:w-1/3">
-          <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-200 h-[500px]">
+      {/* botones de navgecion en celu */}
+      <div className="w-full md:hidden flex justify-center my-2">
+        <button
+          onClick={toggleFormView}
+          className={`px-4 py-2 mx-1 rounded-lg ${
+            showForm ? "bg-blue-500 text-white" : "bg-gray-200"
+          }`}
+        >
+          {taskToEdit ? "Editar tarea" : "Nueva tarea"}
+        </button>
+        <button
+          onClick={toggleFormView}
+          className={`px-4 py-2 mx-1 rounded-lg ${
+            !showForm ? "bg-blue-500 text-white" : "bg-gray-200"
+          }`}
+        >
+          Ver tareas
+        </button>
+      </div>
+
+      <div className="w-full flex flex-col md:flex-row items-start gap-4 px-2 md:px-3">
+        {/* form que aparece y desaparece en el celu */}
+        <div
+          className={`w-full md:w-1/3 ${
+            showForm ? "block" : "hidden md:block"
+          }`}
+        >
+          <div className="bg-white rounded-xl shadow-lg p-3 md:p-4 border border-gray-200 min-h-[300px] md:h-[500px] overflow-auto">
             <TaskForm
               addTask={addTask}
               taskToEdit={taskToEdit}
               handleEditTask={handleEditTask}
               setTaskToEdit={setTaskToEdit}
+              isMobile={isMobile}
             />
           </div>
         </div>
-        <div className="flex-1 ">
-          <div className="bg-white rounded-xl h-[500px] shadow-lg p-4 border border-gray-200">
-            <FilterButtons filter={filter} setFilter={setFilter} />
+
+        {/* lista que aparece y desaparece en el celu */}
+        <div
+          className={`flex-1 w-full ${!showForm ? "block" : "hidden md:block"}`}
+        >
+          <div className="bg-white rounded-xl min-h-[300px] md:h-[500px] shadow-lg p-3 md:p-4 border border-gray-200 overflow-auto">
+            <FilterButtons
+              filter={filter}
+              setFilter={setFilter}
+              isMobile={isMobile}
+            />
             <TaskList
               tasks={filteredTasks}
               deleteTask={deleteTask}
               toggleComplete={toggleComplete}
               clearCompletedTasks={clearCompletedTasks}
-              setTaskToEdit={setTaskToEdit}
+              setTaskToEdit={(task) => {
+                setTaskToEdit(task);
+                // En móvil, mostrar el formulario al editar
+                if (window.innerWidth < 768) {
+                  setShowForm(true);
+                }
+              }}
             />
           </div>
         </div>
