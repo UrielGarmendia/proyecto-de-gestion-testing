@@ -17,14 +17,28 @@ function App() {
 
   // detecta si es celular
   useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-      setShowForm(false);
+    let resizeTimeout;
+
+    const handleResize = () => {
+      // Debounce para evitar múltiples ejecuciones
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        const isReallyMobile = window.innerWidth < 768;
+        if (isMobile !== isReallyMobile) {
+          setIsMobile(isReallyMobile);
+        }
+      }, 200); // Espera 200ms después del último resize
     };
-    checkIfMobile();
-    window.addEventListener("resize", checkIfMobile);
-    return () => window.removeEventListener("resize", checkIfMobile);
-  }, []);
+
+    // Inicialización
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(resizeTimeout);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isMobile]); // Solo dependemos de taskToEdit
 
   // lee de localStorage una sola vez
   useEffect(() => {
@@ -34,7 +48,7 @@ function App() {
     }
     setHasLoaded(true);
 
-    // Listener para ajustar la interfaz cuando cambia el tamaño de pantalla
+    // ajusta la interfaz cuando cambia la pantalla
     const handleResize = () => {
       if (window.innerWidth >= 768) {
         setShowForm(true);
@@ -55,7 +69,7 @@ function App() {
   //crea la tarea
   const addTask = (newTask) => {
     setTasks([...tasks, newTask]);
-    // En móvil, mostrar la lista después de agregar una tarea
+    // muestra lista al agregar tarea con el
     if (window.innerWidth < 768) {
       setShowForm(false);
     }
@@ -131,7 +145,15 @@ function App() {
       {/* botones de navgecion en celu */}
       <div className="w-full md:hidden flex justify-center my-2">
         <button
-          onClick={toggleFormView}
+          onClick={() => {
+            setShowForm(true);
+            setTimeout(() => {
+              const titleInput = document.querySelector('input[name="title"]');
+              if (titleInput) {
+                titleInput.focus({ preventScroll: true });
+              }
+            }, 100);
+          }}
           className={`px-4 py-2 mx-1 rounded-lg ${
             showForm ? "bg-blue-500 text-white" : "bg-gray-200"
           }`}
@@ -181,13 +203,8 @@ function App() {
               deleteTask={deleteTask}
               toggleComplete={toggleComplete}
               clearCompletedTasks={clearCompletedTasks}
-              setTaskToEdit={(task) => {
-                setTaskToEdit(task);
-                // En móvil, mostrar el formulario al editar
-                if (window.innerWidth < 768) {
-                  setShowForm(true);
-                }
-              }}
+              setTaskToEdit={setTaskToEdit}
+              isMobile={isMobile}
             />
           </div>
         </div>

@@ -174,6 +174,21 @@ const TaskForm = ({ addTask, taskToEdit, handleEditTask, setTaskToEdit }) => {
           name="title"
           value={title}
           onChange={handleInputChange}
+          onFocus={(e) => {
+            // Previene el cierre automático
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Enfoca correctamente el input
+            setTimeout(() => {
+              e.target.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+                inline: "center",
+              });
+            }, 300);
+          }}
+          onClick={(e) => e.stopPropagation()}
           placeholder="Añade una nueva tarea..."
           className={`w-full p-3 rounded-lg border ${
             errors.title ? "border-red-500" : "border-gray-300"

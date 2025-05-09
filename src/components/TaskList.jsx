@@ -1,52 +1,70 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import TableTask from "./Task/TableTask";
 import CardTask from "./Task/CardTask";
 
-const TaskList = ({
-  tasks,
-  deleteTask,
-  toggleComplete,
-  clearCompletedTasks,
-  setTaskToEdit,
-  isMobile,
-}) => {
+const TaskList = (props) => {
+  const {
+    tasks,
+    deleteTask,
+    toggleComplete,
+    clearCompletedTasks,
+    setTaskToEdit,
+    isMobile,
+  } = props;
+  const mobileView = isMobile !== undefined ? isMobile : false;
+
   const [subtaskInputs, setSubtaskInputs] = useState({});
   const [expandedTasks, setExpandedTasks] = useState({});
+  const [displayedPercentage, setDisplayedPercentage] = useState(0);
 
   // estadisticas de tareas
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter((task) => task.completed);
-  const totalCompleted = completedTasks.length;
-  const totalPending = totalTasks - totalCompleted;
+  const { totalTasks, totalCompleted, totalPending, completionPercentage } =
+    useMemo(() => {
+      const totalTasks = tasks.length;
+      const totalCompleted = tasks.filter((task) => task.completed).length;
+      const completionPercentage =
+        totalTasks === 0 ? 0 : Math.round((totalCompleted / totalTasks) * 100);
+      return {
+        totalTasks,
+        totalCompleted,
+        totalPending: totalTasks - totalCompleted,
+        completionPercentage,
+      };
+    }, [tasks]);
 
   // barra de progreso
-  const completionPercentage =
-    totalTasks === 0 ? 0 : Math.round((totalCompleted / totalTasks) * 100);
-  const [displayedPercentage, setDisplayedPercentage] =
-    useState(completionPercentage);
+  // const completionPercentage =
+  //   totalTasks === 0 ? 0 : Math.round((totalCompleted / totalTasks) * 100);
+  // const [displayedPercentage, setDisplayedPercentage] =
+  //   useState(completionPercentage);
 
+  const animationRef = useRef();
   useEffect(() => {
-    const difference = completionPercentage - displayedPercentage;
-    if (difference === 0) return;
+    const targetPercentage = completionPercentage;
+    const duration = 100;
+    const startTime = performance.now();
+    const startPercentage = displayedPercentage;
 
-    const step = difference > 0 ? 1 : -1;
-    const interval = setInterval(() => {
-      setDisplayedPercentage((prev) => {
-        const next = prev + step;
-        if (
-          (step > 0 && next >= completionPercentage) ||
-          (step < 0 && next <= completionPercentage)
-        ) {
-          clearInterval(interval);
-          return completionPercentage;
-        }
-        return next;
-      });
-    }, 5);
+    const animate = (currentTime) => {
+      const elapsedTime = currentTime - startTime;
+      const progress = Math.min(elapsedTime / duration, 1);
 
-    return () => clearInterval(interval);
-  }, [completionPercentage, displayedPercentage]);
+      const newPercentage =
+        startPercentage + (targetPercentage - startPercentage) * progress;
+      setDisplayedPercentage(Math.round(newPercentage));
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(animationRef.current);
+    };
+  }, [completionPercentage]);
 
   const getPriorityColor = (priority) => {
     switch (priority) {
@@ -84,6 +102,7 @@ const TaskList = ({
 
   return (
     <div className="w-full space-y-4">
+      {console.log()}
       {/* parte con las estadísticas de tareas */}
       <div className="flex flex-col sm:flex-row flex-wrap justify-between items-start sm:items-center gap-3">
         <h2 className="text-lg font-semibold">Tareas Agregadas</h2>
@@ -124,7 +143,8 @@ const TaskList = ({
       </div>
 
       {/* vista en escritorio - usa una tabla */}
-      {!isMobile && (
+      {/* {console.log(isMobile)} */}
+      {!mobileView && (
         <div className="border border-gray-200 rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <div className="overflow-y-auto max-h-[332px]">

@@ -25,6 +25,10 @@ const TableTask = ({
     return `${parseInt(day)}/${parseInt(month)}/${year}`;
   };
 
+  const handleUpperFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+
   return (
     <>
       <tr
@@ -47,7 +51,7 @@ const TableTask = ({
               onClick={() => toggleTaskDetails(task.id)}
               style={{ cursor: "pointer" }}
             >
-              {task.title}
+              {handleUpperFirstLetter(task.title)}
             </span>
           </div>
         </td>
@@ -58,7 +62,7 @@ const TableTask = ({
                 task.priority
               )} mr-2`}
             ></span>
-            {task.priority}
+            {handleUpperFirstLetter(task.priority)}
           </div>
         </td>
         <td className="p-2 text-sm">{task.category}</td>

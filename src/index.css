@@ -22,6 +22,29 @@ body {
   color: gray;
 }
 
-/* ::-webkit-scrollbar {
-  background-color: tra;
-} */
+/* Previene comportamientos no deseados en móviles */
+@media (max-width: 767px) {
+  html {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    position: fixed;
+    width: 100%;
+  }
+
+  input,
+  textarea {
+    font-size: 16px !important;
+    touch-action: manipulation;
+  }
+
+  /* Evita que el teclado mueva elementos */
+  .form-container {
+    transform: translate3d(0, 0, 0);
+  }
+}

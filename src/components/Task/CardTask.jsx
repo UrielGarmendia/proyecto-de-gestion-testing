@@ -24,14 +24,24 @@ const CardTask = ({
     return `${parseInt(day)}/${parseInt(month)}/${year}`;
   };
 
+  const handleUpperFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+
   return (
-    <div className="mb-3 bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+    <div
+      onClick={() => toggleTaskDetails(task.id)}
+      className="mb-3 bg-white rounded-lg shadow border border-gray-200 overflow-hidden"
+    >
       <div className="p-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={task.completed}
-            onChange={() => toggleComplete(task.id)}
+            onClick={(e) => e.stopPropagation()}
+            onChange={() => {
+              toggleComplete(task.id);
+            }}
             className="rounded text-blue-500 focus:ring-blue-500 h-4 w-4"
           />
           <span
@@ -39,14 +49,11 @@ const CardTask = ({
               task.completed ? "line-through text-gray-400" : ""
             }`}
           >
-            {task.title}
+            {handleUpperFirstLetter(task.title)}
           </span>
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={() => toggleTaskDetails(task.id)}
-            className="text-blue-500 hover:text-blue-700 p-1"
-          >
+          <button className="text-blue-500 hover:text-blue-700 p-1">
             {expandedTasks[task.id] ? (
               <FaChevronUp size={14} />
             ) : (
@@ -62,7 +69,7 @@ const CardTask = ({
             task.priority
           )}`}
         >
-          {task.priority}
+          {handleUpperFirstLetter(task.priority)}
         </span>
         <span
           className={`text-xs px-2 py-1 rounded-full ${
