@@ -8,29 +8,27 @@ let miStorage = window.localStorage;
 
 function App() {
   const [tasks, setTasks] = useState([]);
-  const [filter, setFilter] = useState("all");
+  const [filters, setFilters] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [taskToEdit, setTaskToEdit] = useState(null);
+  const [taskToEdit, setTaskToEdit] = useState(null); // Estado para la tarea a editar
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showForm, setShowForm] = useState(true); // controla la visibilidad del formulario en el celu
 
-  // detecta si es celular
+  // Detecta si es celular
   useEffect(() => {
     let resizeTimeout;
 
     const handleResize = () => {
-      // Debounce para evitar múltiples ejecuciones
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
         const isReallyMobile = window.innerWidth < 768;
         if (isMobile !== isReallyMobile) {
           setIsMobile(isReallyMobile);
         }
-      }, 200); // Espera 200ms después del último resize
+      }, 200);
     };
 
-    // Inicialización
     handleResize();
 
     window.addEventListener("resize", handleResize);
@@ -38,49 +36,38 @@ function App() {
       clearTimeout(resizeTimeout);
       window.removeEventListener("resize", handleResize);
     };
-  }, [isMobile]); // Solo dependemos de taskToEdit
+  }, [isMobile]);
 
-  // lee de localStorage una sola vez
+  // Lee de localStorage una sola vez
   useEffect(() => {
     const storedTasks = miStorage.getItem("tasks");
     if (storedTasks) {
       setTasks(JSON.parse(storedTasks));
     }
     setHasLoaded(true);
-
-    // ajusta la interfaz cuando cambia la pantalla
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setShowForm(true);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // guarda en localStorage despues de cargar
+  // Guarda en localStorage después de cargar
   useEffect(() => {
     if (hasLoaded) {
       miStorage.setItem("tasks", JSON.stringify(tasks));
     }
   }, [tasks, hasLoaded]);
 
-  //crea la tarea
+  // Crea la tarea
   const addTask = (newTask) => {
     setTasks([...tasks, newTask]);
-    // muestra lista al agregar tarea con el
     if (window.innerWidth < 768) {
       setShowForm(false);
     }
   };
 
-  //borra la tarea
+  // Borra la tarea
   const deleteTask = (taskId) => {
     setTasks(tasks.filter((task) => task.id !== taskId));
   };
 
-  //marca la tarea como completado
+  // Marca la tarea como completado
   const toggleComplete = (taskId) => {
     setTasks(
       tasks.map((task) =>
@@ -89,48 +76,59 @@ function App() {
     );
   };
 
-  //elimina las completas
+  // Elimina las completas
   const clearCompletedTasks = () => {
     setTasks(tasks.filter((task) => !task.completed));
   };
 
-  //edita las tareas
+  // Edita las tareas
   const handleEditTask = (updatedTask) => {
     setTasks((prev) =>
       prev.map((task) => (task.id === updatedTask.id ? updatedTask : task))
     );
-    // en el celu vuelve a la lista despues de editarla
     if (window.innerWidth < 768) {
       setShowForm(false);
     }
+    setTaskToEdit(null); // Resetear taskToEdit después de editar
   };
 
   const filteredTasks = tasks
     .filter((task) => {
-      if (filter === "all") return true;
-      if (filter === "recent") {
-        if (task.completed) return false;
-        if (!task.date) return false; // si no hay fecha no se vence
-        // se establece como 00:00 si no hay hora
-        const fullTime = task.time ? task.time : "00:00";
-        const taskDateTime = new Date(`${task.date}T${fullTime}`);
-        const now = new Date();
-        return taskDateTime >= now;
-      }
-      return task.priority === filter;
+      const now = new Date();
+      const getTaskDateTime = (t) => {
+        if (!t.date) return null;
+        const fullTime = t.time || "00:00";
+        return new Date(`${t.date}T${fullTime}`);
+      };
+
+      const isVencida = () => {
+        if (!task.date) return false;
+        const taskDate = getTaskDateTime(task);
+        return !task.completed && taskDate && now > taskDate;
+      };
+
+      const passesPriority =
+        !filters.some((f) => ["baja", "media", "alta"].includes(f)) ||
+        filters.includes(task.priority);
+
+      const passesVencidas = !filters.includes("vencidas") || isVencida();
+
+      const passesRecientes =
+        !filters.includes("recent") ||
+        (!task.completed && task.date && getTaskDateTime(task) >= now);
+
+      return passesPriority && passesVencidas && passesRecientes;
     })
     .sort((a, b) => {
-      if (filter === "recent") {
-        const timeA = a.time ? a.time : "00:00";
-        const timeB = b.time ? b.time : "00:00";
-        const dateA = new Date(`${a.date}T${timeA}`);
-        const dateB = new Date(`${b.date}T${timeB}`);
-        return dateA - dateB;
+      if (filters.includes("recent")) {
+        const getTime = (t) =>
+          new Date(`${t.date || "2100-01-01"}T${t.time || "00:00"}`);
+        return getTime(a) - getTime(b);
       }
       return 0;
     });
 
-  // alterna entre formulario y lista en el celu
+  // Alterna entre formulario y lista en el celular
   const toggleFormView = () => {
     setShowForm(!showForm);
   };
@@ -142,7 +140,7 @@ function App() {
         toggleLogin={() => setIsLoggedIn(!isLoggedIn)}
       />
 
-      {/* botones de navgecion en celu */}
+      {/* Botones de navegación en celular */}
       <div className="w-full md:hidden flex justify-center my-2">
         <button
           onClick={() => {
@@ -171,7 +169,7 @@ function App() {
       </div>
 
       <div className="w-full flex flex-col md:flex-row items-start gap-4 px-2 md:px-3">
-        {/* form que aparece y desaparece en el celu */}
+        {/* Formulario que aparece y desaparece en el celular */}
         <div
           className={`w-full md:w-1/3 ${
             showForm ? "block" : "hidden md:block"
@@ -188,16 +186,17 @@ function App() {
           </div>
         </div>
 
-        {/* lista que aparece y desaparece en el celu */}
+        {/* Lista que aparece y desaparece en el celular */}
         <div
           className={`flex-1 w-full ${!showForm ? "block" : "hidden md:block"}`}
         >
           <div className="bg-white rounded-xl min-h-[300px] md:h-[500px] shadow-lg p-3 md:p-4 border border-gray-200 overflow-auto">
             <FilterButtons
-              filter={filter}
-              setFilter={setFilter}
+              filters={filters}
+              setFilters={setFilters}
               isMobile={isMobile}
             />
+
             <TaskList
               tasks={filteredTasks}
               deleteTask={deleteTask}

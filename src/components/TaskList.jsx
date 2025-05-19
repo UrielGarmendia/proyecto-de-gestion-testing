@@ -3,46 +3,60 @@ import { FaTrashAlt } from "react-icons/fa";
 import TableTask from "./Task/TableTask";
 import CardTask from "./Task/CardTask";
 
-const TaskList = (props) => {
-  const {
-    tasks,
-    deleteTask,
-    toggleComplete,
-    clearCompletedTasks,
-    setTaskToEdit,
-    isMobile,
-  } = props;
+const TaskList = ({
+  tasks,
+  deleteTask,
+  toggleComplete,
+  clearCompletedTasks,
+  setTaskToEdit,
+  isMobile,
+}) => {
+  // const {
+  //   tasks,
+  //   deleteTask,
+  //   toggleComplete,
+  //   clearCompletedTasks,
+  //   setTaskToEdit,
+  //   isMobile,
+  // } = props;
   const mobileView = isMobile !== undefined ? isMobile : false;
 
   const [subtaskInputs, setSubtaskInputs] = useState({});
   const [expandedTasks, setExpandedTasks] = useState({});
   const [displayedPercentage, setDisplayedPercentage] = useState(0);
 
-  // estadisticas de tareas
-  const { totalTasks, totalCompleted, totalPending, completionPercentage } =
-    useMemo(() => {
-      const totalTasks = tasks.length;
-      const totalCompleted = tasks.filter((task) => task.completed).length;
-      const completionPercentage =
-        totalTasks === 0 ? 0 : Math.round((totalCompleted / totalTasks) * 100);
-      return {
-        totalTasks,
-        totalCompleted,
-        totalPending: totalTasks - totalCompleted,
-        completionPercentage,
-      };
-    }, [tasks]);
+  // Filtrar tareas vencidas
+  const {
+    totalTasks,
+    totalCompleted,
+    totalPending,
+    totalExpired,
+    completionPercentage,
+  } = useMemo(() => {
+    const totalTasks = tasks.length;
+    const totalCompleted = tasks.filter((task) => task.completed).length;
+    const totalExpired = tasks.filter(
+      (task) => new Date(task.fecha) < new Date() && !task.completed
+    ).length; // Compara fecha de la tarea con la fecha actual
+    const completionPercentage =
+      totalTasks === 0 ? 0 : Math.round((totalCompleted / totalTasks) * 100);
 
-  // barra de progreso
-  // const completionPercentage =
-  //   totalTasks === 0 ? 0 : Math.round((totalCompleted / totalTasks) * 100);
-  // const [displayedPercentage, setDisplayedPercentage] =
-  //   useState(completionPercentage);
+    return {
+      totalTasks,
+      totalCompleted,
+      totalPending: totalTasks - totalCompleted,
+      totalExpired,
+      completionPercentage,
+    };
+  }, [tasks]);
 
+  // Barra de progreso
   const animationRef = useRef();
   useEffect(() => {
+    if (completionPercentage === displayedPercentage) return; // Evita animación si no ha cambiado
+
     const targetPercentage = completionPercentage;
-    const duration = 100;
+    const duration = 200;
     const startTime = performance.now();
     const startPercentage = displayedPercentage;
 
@@ -64,7 +78,7 @@ const TaskList = (props) => {
     return () => {
       cancelAnimationFrame(animationRef.current);
     };
-  }, [completionPercentage]);
+  }, [completionPercentage, displayedPercentage]);
 
   const getPriorityColor = (priority) => {
     switch (priority) {
@@ -77,11 +91,6 @@ const TaskList = (props) => {
         return "bg-green-500";
     }
   };
-
-  // const handleAddSubtask = (taskId) => {
-  //   setSubtaskInputs({ ...subtaskInputs, [taskId]: "" });
-  //   setExpandedTasks({ ...expandedTasks, [taskId]: !expandedTasks[taskId] });
-  // };
 
   const handleSubtaskChange = (taskId, value) => {
     setSubtaskInputs({ ...subtaskInputs, [taskId]: value });
@@ -100,10 +109,13 @@ const TaskList = (props) => {
     setExpandedTasks({ ...expandedTasks, [taskId]: !expandedTasks[taskId] });
   };
 
+  const handleEditTask = (task) => {
+    setTaskToEdit(task); // Guarda la tarea a editar
+  };
+
   return (
     <div className="w-full space-y-4">
-      {console.log()}
-      {/* parte con las estadísticas de tareas */}
+      {/* Parte con las estadísticas de tareas */}
       <div className="flex flex-col sm:flex-row flex-wrap justify-between items-start sm:items-center gap-3">
         <h2 className="text-lg font-semibold">Tareas Agregadas</h2>
         <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
@@ -116,6 +128,9 @@ const TaskList = (props) => {
           <span className="text-blue-600">
             Pendientes: <b>{totalPending}</b>
           </span>
+          <span className="text-red-600">
+            Vencidas: <b>{totalExpired}</b>
+          </span>
           <button
             onClick={clearCompletedTasks}
             className="flex items-center gap-1 text-red-500 hover:text-red-700 text-xs sm:text-sm"
@@ -125,7 +140,7 @@ const TaskList = (props) => {
         </div>
       </div>
 
-      {/* barra que muestra progreso de completado */}
+      {/* Barra que muestra progreso de completado */}
       <div className="flex items-center gap-3">
         <div className="flex-1 bg-gray-200 rounded-full h-2">
           <div
@@ -142,8 +157,7 @@ const TaskList = (props) => {
         <span className="text-sm text-gray-600">{displayedPercentage}%</span>
       </div>
 
-      {/* vista en escritorio - usa una tabla */}
-      {/* {console.log(isMobile)} */}
+      {/* Vista en escritorio - usa una tabla */}
       {!mobileView && (
         <div className="border border-gray-200 rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
@@ -191,7 +205,7 @@ const TaskList = (props) => {
         </div>
       )}
 
-      {/* vista en celu - usa cards */}
+      {/* Vista en celular - usa cards */}
       {isMobile && (
         <div className="overflow-y-auto max-h-[332px] px-1">
           {tasks.length > 0 ? (
@@ -203,7 +217,7 @@ const TaskList = (props) => {
                 toggleTaskDetails={toggleTaskDetails}
                 getPriorityColor={getPriorityColor}
                 deleteTask={deleteTask}
-                setTaskToEdit={setTaskToEdit}
+                setTaskToEdit={() => handleEditTask(task)} // Llamar correctamente a handleEditTask
                 expandedTasks={expandedTasks}
                 subtaskInputs={subtaskInputs}
                 handleSubtaskChange={handleSubtaskChange}

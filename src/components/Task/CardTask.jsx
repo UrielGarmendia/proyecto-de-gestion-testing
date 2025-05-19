@@ -28,6 +28,21 @@ const CardTask = ({
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
 
+  const isOverdue = (task) => {
+    if (!task.date) return false;
+    const now = new Date();
+    const [year, month, day] = task.date.split("-").map(Number);
+
+    if (task.time) {
+      const [hour, minute] = task.time.split(":").map(Number);
+      const taskDateTime = new Date(year, month - 1, day, hour, minute);
+      return !task.completed && now > taskDateTime;
+    } else {
+      const taskDate = new Date(year, month - 1, day, 23, 59, 59);
+      return !task.completed && now > taskDate;
+    }
+  };
+
   return (
     <div
       onClick={() => toggleTaskDetails(task.id)}
@@ -75,10 +90,16 @@ const CardTask = ({
           className={`text-xs px-2 py-1 rounded-full ${
             task.completed
               ? "bg-green-100 text-green-800"
+              : isOverdue(task)
+              ? "bg-red-100 text-red-800"
               : "bg-yellow-100 text-yellow-800"
           }`}
         >
-          {task.completed ? "Completada" : "Pendiente"}
+          {task.completed
+            ? "Completada"
+            : isOverdue(task)
+            ? "Vencida"
+            : "Pendiente"}
         </span>
       </div>
 

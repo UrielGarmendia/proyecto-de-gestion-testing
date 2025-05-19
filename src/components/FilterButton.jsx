@@ -1,48 +1,61 @@
-const FilterButtons = ({ filter, setFilter, isMobile }) => {
-  const filters = [
-    { value: "all", label: "Todas" },
+const FilterButtons = ({ filters, setFilters, isMobile }) => {
+  const allFilters = [
     { value: "baja", label: "Baja" },
     { value: "media", label: "Media" },
     { value: "alta", label: "Alta" },
+    { value: "vencidas", label: "Vencidas" },
     { value: "recent", label: "Más reciente" },
   ];
 
-  const handleSelectChange = (e) => {
-    setFilter(e.target.value);
+  const toggleFilter = (value) => {
+    setFilters((prev) =>
+      prev.includes(value) ? prev.filter((f) => f !== value) : [...prev, value]
+    );
+  };
+
+  const clearFilters = () => {
+    setFilters([]);
   };
 
   return (
     <>
       {isMobile ? (
         <select
-          value={filter}
-          onChange={handleSelectChange}
-          name="filter"
+          value={filters}
+          onChange={(e) =>
+            setFilters(Array.from(e.target.selectedOptions, (opt) => opt.value))
+          }
           className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 text-gray-800 text-sm"
         >
-          {filters.map((f) => (
+          {allFilters.map((f) => (
             <option key={f.value} value={f.value}>
               {f.label}
             </option>
           ))}
         </select>
       ) : (
-        <div className="mb-4">
-          <div className="flex space-x-2">
-            {filters.map((f) => (
-              <button
-                key={f.value}
-                onClick={() => setFilter(f.value)}
-                className={`filter-btn font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50 transition duration-300 ease-in-out ${
-                  filter === f.value
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-gray-500 dark:text-white dark:hover:bg-gray-400"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
+        <div className="mb-4 flex flex-wrap gap-2">
+          {allFilters.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => toggleFilter(f.value)}
+              className={`px-4 py-2 rounded-full shadow-md transition duration-300 ease-in-out text-sm font-semibold
+                ${
+                  filters.includes(f.value)
+                    ? "bg-blue-500 text-white shadow-lg"
+                    : "bg-gray-200 hover:bg-blue-600 text-gray-700 dark:bg-gray-500 dark:text-white dark:hover:bg-gray-400"
+                }
+              `}
+            >
+              {f.label}
+            </button>
+          ))}
+          <button
+            onClick={clearFilters}
+            className="px-4 py-2 rounded-full bg-blue-500 text-white shadow-md hover:bg-blue-600 transition duration-300 ease-in-out text-sm font-semibold"
+          >
+            Limpiar filtros
+          </button>
         </div>
       )}
     </>
