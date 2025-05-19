@@ -22,6 +22,7 @@ const FilterButtons = ({ filters, setFilters, isMobile }) => {
       {isMobile ? (
         <select
           value={filters}
+          multiple
           onChange={(e) =>
             setFilters(Array.from(e.target.selectedOptions, (opt) => opt.value))
           }
