@@ -173,9 +173,9 @@ const TableTask = ({
                   />
                   <button
                     onClick={() => handleAddSubtask(task.id)}
-                    className="ml-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-2 rounded-lg text-xs"
+                    className="ml-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold p-1.5 rounded-lg text-xs"
                   >
-                    <FaPlus size={10} /> Agregar
+                    <FaPlus size={16} />
                   </button>
                 </div>
               </div>
@@ -211,25 +211,32 @@ const TableTask = ({
                 {/* Barra de progreso (solo si hay subtareas) */}
                 {(subtaskInputs[task.id]?.list || []).length > 0 &&
                   getSubtaskProgress(task.id) && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="flex-1 bg-gray-200 rounded-full h-1">
-                        <div
-                          className={`h-1 rounded-full ${
-                            getSubtaskProgress(task.id).percentage < 50
-                              ? "bg-red-400"
-                              : getSubtaskProgress(task.id).percentage < 80
-                              ? "bg-yellow-400"
-                              : "bg-green-500"
-                          }`}
-                          style={{
-                            width: `${getSubtaskProgress(task.id).percentage}%`,
-                          }}
-                        />
+                    <div className="mt-2">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-500 ease-in-out ${
+                              getSubtaskProgress(task.id).percentage < 50
+                                ? "bg-red-400"
+                                : getSubtaskProgress(task.id).percentage < 80
+                                ? "bg-yellow-400"
+                                : "bg-green-500"
+                            }`}
+                            style={{
+                              width: `${
+                                getSubtaskProgress(task.id).percentage
+                              }%`,
+                            }}
+                          ></div>
+                        </div>
+                        <span className="text-xs text-gray-600">
+                          {getSubtaskProgress(task.id).percentage}%
+                        </span>
+                        <span className="text-xs text-gray-600">
+                          {getSubtaskProgress(task.id).completed}/
+                          {getSubtaskProgress(task.id).total}
+                        </span>
                       </div>
-                      <span className="text-xs text-gray-500">
-                        {getSubtaskProgress(task.id).completed}/
-                        {getSubtaskProgress(task.id).total}
-                      </span>
                     </div>
                   )}
               </div>

@@ -10,21 +10,14 @@ const TaskList = ({
   clearCompletedTasks,
   setTaskToEdit,
   isMobile,
+  subtasks,
+  setSubtasks,
+  handleSubtaskChange,
+  handleAddSubtask,
+  toggleSubtask,
+  getSubtaskProgress,
 }) => {
   const mobileView = isMobile !== undefined ? isMobile : false;
-
-  const [subtasks, setSubtasks] = useState({});
-
-  useEffect(() => {
-    const initialState = {};
-    tasks.forEach((task) => {
-      initialState[task.id] = {
-        input: "",
-        list: task.subtasks || [],
-      };
-    });
-    setSubtasks(initialState);
-  }, [tasks]);
 
   const [expandedTasks, setExpandedTasks] = useState({});
   const [displayedPercentage, setDisplayedPercentage] = useState(0);
@@ -41,7 +34,7 @@ const TaskList = ({
     const totalCompleted = tasks.filter((task) => task.completed).length;
     const totalExpired = tasks.filter(
       (task) => new Date(task.fecha) < new Date() && !task.completed
-    ).length; // Compara fecha de la tarea con la fecha actual
+    ).length;
     const completionPercentage =
       totalTasks === 0 ? 0 : Math.round((totalCompleted / totalTasks) * 100);
 
@@ -56,13 +49,10 @@ const TaskList = ({
 
   // barra de progreso
   useEffect(() => {
-    // asegurar porcentaje valido
     const targetPercentage = Math.min(Math.max(completionPercentage, 0), 100);
 
-    // o anima si esta en el valor objetivo
     if (displayedPercentage === targetPercentage) return;
 
-    // animacion
     const duration = 300;
     const startTime = performance.now();
     const startPercentage = displayedPercentage;
@@ -86,10 +76,8 @@ const TaskList = ({
       }
     };
 
-    // empieza la animacion
     animationFrameId = requestAnimationFrame(animate);
 
-    // limpieza
     return () => {
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
@@ -109,71 +97,31 @@ const TaskList = ({
     }
   };
 
-  const handleSubtaskChange = (taskId, value) => {
-    setSubtasks((prev) => ({
-      ...prev,
-      [taskId]: {
-        ...(prev[taskId] || { input: "", list: [] }), // Estructura segura
-        input: value,
-      },
-    }));
-  };
-  const handleAddSubtask = (taskId) => {
-    setSubtasks((prev) => {
-      const current = prev[taskId] || { input: "", list: [] };
-      if (!current.input.trim()) return prev;
-
-      const newSubtask = {
-        id: Date.now(),
-        text: current.input.trim(),
-        completed: false,
-      };
-
-      return {
-        ...prev,
-        [taskId]: {
-          input: "",
-          list: [...current.list, newSubtask],
-        },
-      };
-    });
-  };
-
-  const toggleSubtask = (taskId, subtaskId) => {
-    setSubtasks((prev) => {
-      const current = prev[taskId] || { input: "", list: [] };
-      return {
-        ...prev,
-        [taskId]: {
-          ...current,
-          list: current.list.map((subtask) =>
-            subtask.id === subtaskId
-              ? { ...subtask, completed: !subtask.completed }
-              : subtask
-          ),
-        },
-      };
-    });
-  };
-
-  // Función para calcular progreso
-  const getSubtaskProgress = (taskId) => {
-    const subtaskList = subtasks[taskId]?.list || [];
-    if (subtaskList.length === 0) return null;
-
-    const total = subtaskList.length;
-    const completed = subtaskList.filter((s) => s.completed).length;
-    const percentage = Math.round((completed / total) * 100);
-
-    return { total, completed, percentage };
-  };
-
   const toggleTaskDetails = (taskId) => {
     setExpandedTasks({ ...expandedTasks, [taskId]: !expandedTasks[taskId] });
   };
 
   const handleEditTask = (task) => {
-    setTaskToEdit(task); // Guarda la tarea a editar
+    setTaskToEdit(task);
+  };
+
+  const handleToggleComplete = (taskId) => {
+    toggleComplete(taskId); // Llama a la función original
+
+    // Preservamos las subtareas al completar la tarea
+    setSubtasks((prev) => {
+      if (!prev[taskId]) return prev;
+      return {
+        ...prev,
+        [taskId]: {
+          ...prev[taskId],
+          list: prev[taskId].list.map((subtask) => ({
+            ...subtask,
+            completed: true, // Opcional: marcar todas las subtareas como completadas
+          })),
+        },
+      };
+    });
   };
 
   return (
@@ -214,9 +162,10 @@ const TaskList = ({
                 ? "bg-yellow-400"
                 : "bg-green-500"
             }`}
-            style={{ width: `${completionPercentage}%` }}
+            style={{ width: `${displayedPercentage}%` }}
           />
         </div>
+
         <span className="text-sm text-gray-600">{displayedPercentage}%</span>
       </div>
 
@@ -243,7 +192,7 @@ const TaskList = ({
                       <TableTask
                         key={task.id}
                         task={task}
-                        toggleComplete={toggleComplete}
+                        toggleComplete={handleToggleComplete}
                         toggleTaskDetails={toggleTaskDetails}
                         getPriorityColor={getPriorityColor}
                         deleteTask={deleteTask}

@@ -46,11 +46,11 @@ const CardTask = ({
   };
 
   return (
-    <div
-      onClick={() => toggleTaskDetails(task.id)}
-      className="mb-3 bg-white rounded-lg shadow border border-gray-200 overflow-hidden"
-    >
-      <div className="p-3 flex items-center justify-between">
+    <div className="mb-3 bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+      <div
+        className="p-3 flex items-center justify-between"
+        onClick={() => toggleTaskDetails(task.id)}
+      >
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -104,9 +104,11 @@ const CardTask = ({
             : "Pendiente"}
         </span>
       </div>
-
       {expandedTasks[task.id] && (
-        <div className="p-3 border-t border-gray-200 bg-gray-50">
+        <div
+          className="p-3 border-t border-gray-200 bg-gray-50"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="grid grid-cols-2 gap-2 mb-3">
             <div>
               <span className="text-xs text-gray-500">Categoría:</span>
@@ -146,9 +148,9 @@ const CardTask = ({
               />
               <button
                 onClick={() => handleAddSubtask(task.id)}
-                className="ml-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-2 rounded-lg text-xs"
+                className="ml-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold p-1.5 rounded-lg text-xs"
               >
-                <FaPlus size={10} /> Agregar
+                <FaPlus size={16} />
               </button>
             </div>
           </div>
@@ -183,30 +185,35 @@ const CardTask = ({
             {/* Barra de progreso (solo si hay subtareas) */}
             {(subtaskInputs[task.id]?.list || []).length > 0 &&
               getSubtaskProgress(task.id) && (
-                <div className="mt-2 flex items-center gap-2">
-                  <div className="flex-1 bg-gray-200 rounded-full h-1">
-                    <div
-                      className={`h-1 rounded-full ${
-                        getSubtaskProgress(task.id).percentage < 50
-                          ? "bg-red-400"
-                          : getSubtaskProgress(task.id).percentage < 80
-                          ? "bg-yellow-400"
-                          : "bg-green-500"
-                      }`}
-                      style={{
-                        width: `${getSubtaskProgress(task.id).percentage}%`,
-                      }}
-                    />
+                <div className="mt-2">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div
+                        className={`h-2 rounded-full transition-all duration-500 ease-in-out ${
+                          getSubtaskProgress(task.id).percentage < 50
+                            ? "bg-red-400"
+                            : getSubtaskProgress(task.id).percentage < 80
+                            ? "bg-yellow-400"
+                            : "bg-green-500"
+                        }`}
+                        style={{
+                          width: `${getSubtaskProgress(task.id).percentage}%`,
+                        }}
+                      ></div>
+                    </div>
+                    <span className="text-xs text-gray-600">
+                      {getSubtaskProgress(task.id).percentage}%
+                    </span>
+                    <span className="text-xs text-gray-600">
+                      {getSubtaskProgress(task.id).completed}/
+                      {getSubtaskProgress(task.id).total}
+                    </span>
                   </div>
-                  <span className="text-xs text-gray-500">
-                    {getSubtaskProgress(task.id).completed}/
-                    {getSubtaskProgress(task.id).total}
-                  </span>
                 </div>
               )}
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">
+          <div className="flex justify-end gap-2 pt-2  border-gray-200">
             <button
               onClick={() => setTaskToEdit(task)}
               className="text-yellow-500 hover:text-yellow-700 p-2"

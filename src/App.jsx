@@ -3,6 +3,12 @@ import Header from "./components/Header";
 import TaskForm from "./components/TaskForm";
 import FilterButtons from "./components/FilterButton";
 import TaskList from "./components/TaskList";
+import {
+  subtaskChange,
+  addSubtask,
+  toggleSubtask,
+  getSubtaskProgress,
+} from "./utils/subtaskUtils";
 
 let miStorage = window.localStorage;
 
@@ -14,6 +20,7 @@ function App() {
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showForm, setShowForm] = useState(true); // controla la visibilidad del formulario en el celu
+  const [subtasks, setSubtasks] = useState({});
 
   // Detecta si es celular
   useEffect(() => {
@@ -38,21 +45,59 @@ function App() {
     };
   }, [isMobile]);
 
-  // Lee de localStorage una sola vez
   useEffect(() => {
     const storedTasks = miStorage.getItem("tasks");
+    const storedSubtasks = miStorage.getItem("subtasks");
+
     if (storedTasks) {
-      setTasks(JSON.parse(storedTasks));
+      const parsedTasks = JSON.parse(storedTasks);
+      setTasks(parsedTasks);
+
+      // Inicializa subtareas basado en las tareas cargadas
+      if (storedSubtasks) {
+        const parsedSubtasks = JSON.parse(storedSubtasks);
+        // Filtramos subtareas que no tengan tarea correspondiente
+        const validSubtasks = {};
+        parsedTasks.forEach((task) => {
+          if (parsedSubtasks[task.id]) {
+            validSubtasks[task.id] = parsedSubtasks[task.id];
+          } else {
+            validSubtasks[task.id] = {
+              input: "",
+              list: task.subtasks || [],
+            };
+          }
+        });
+        setSubtasks(validSubtasks);
+      } else {
+        // Si no hay subtareas guardadas, inicializar desde tareas
+        const initialSubtasks = {};
+        parsedTasks.forEach((task) => {
+          initialSubtasks[task.id] = {
+            input: "",
+            list: task.subtasks || [],
+          };
+        });
+        setSubtasks(initialSubtasks);
+      }
     }
     setHasLoaded(true);
   }, []);
 
-  // Guarda en localStorage después de cargar
+  // Guarda en localStorage cuando cambian los datos - MEJORADO
   useEffect(() => {
     if (hasLoaded) {
       miStorage.setItem("tasks", JSON.stringify(tasks));
+      // Guardamos solo las subtareas de tareas existentes
+      const subtasksToSave = {};
+      tasks.forEach((task) => {
+        if (subtasks[task.id]) {
+          subtasksToSave[task.id] = subtasks[task.id];
+        }
+      });
+      miStorage.setItem("subtasks", JSON.stringify(subtasksToSave));
     }
-  }, [tasks, hasLoaded]);
+  }, [tasks, subtasks, hasLoaded]);
 
   // Crea la tarea
   const addTask = (newTask) => {
@@ -133,6 +178,22 @@ function App() {
     setShowForm(!showForm);
   };
 
+  const handleSubtaskChange = (taskId, value) => {
+    setSubtasks((prev) => subtaskChange(prev, taskId, value));
+  };
+
+  const handleAddSubtask = (taskId) => {
+    setSubtasks((prev) => addSubtask(prev, taskId));
+  };
+
+  const handleToggleSubtask = (taskId, subtaskId) => {
+    setSubtasks((prev) => toggleSubtask(prev, taskId, subtaskId));
+  };
+
+  const handleGetSubtaskProgress = (taskId) => {
+    return getSubtaskProgress(subtasks, taskId);
+  };
+
   return (
     <div className="min-h-screen p-2 md:p-3 flex flex-col items-start bg-[#edebe6]">
       <Header
@@ -204,6 +265,12 @@ function App() {
               clearCompletedTasks={clearCompletedTasks}
               setTaskToEdit={setTaskToEdit}
               isMobile={isMobile}
+              subtasks={subtasks}
+              setSubtasks={setSubtasks}
+              handleSubtaskChange={handleSubtaskChange}
+              handleAddSubtask={handleAddSubtask}
+              toggleSubtask={handleToggleSubtask}
+              getSubtaskProgress={handleGetSubtaskProgress}
             />
           </div>
         </div>
