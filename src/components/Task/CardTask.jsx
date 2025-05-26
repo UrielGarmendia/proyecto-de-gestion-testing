@@ -16,7 +16,9 @@ const CardTask = ({
   expandedTasks,
   subtaskInputs,
   handleSubtaskChange,
-  handleSubtaskSubmit,
+  handleAddSubtask,
+  toggleSubtask,
+  getSubtaskProgress,
 }) => {
   const formatDateToDisplay = (time) => {
     if (!time) return "";
@@ -129,20 +131,79 @@ const CardTask = ({
             </div>
           )}
 
-          <div className="flex items-center gap-2 mb-3">
-            <input
-              type="text"
-              value={subtaskInputs[task.id] || ""}
-              onChange={(e) => handleSubtaskChange(task.id, e.target.value)}
-              placeholder="Añadir subtarea..."
-              className="flex-1 p-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-            />
-            <button
-              onClick={() => handleSubtaskSubmit(task.id)}
-              className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-            >
-              <FaPlus size={12} />
-            </button>
+          <div className="mb-2">
+            <div className="flex items-center mb-1">
+              <input
+                type="text"
+                value={subtaskInputs[task.id]?.input || ""}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => handleSubtaskChange(task.id, e.target.value)}
+                onKeyDown={(e) =>
+                  e.key === "Enter" && handleAddSubtask(task.id)
+                }
+                placeholder="Escribe una subtarea..."
+                className="flex-1 p-1 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              />
+              <button
+                onClick={() => handleAddSubtask(task.id)}
+                className="ml-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-2 rounded-lg text-xs"
+              >
+                <FaPlus size={10} /> Agregar
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="font-medium text-gray-700 mb-1 text-sm">
+              Subtareas ({(subtaskInputs[task.id]?.list || []).length}):
+            </h4>
+            <ul className="space-y-1 pl-2">
+              {(subtaskInputs[task.id]?.list || []).map((subtask) => (
+                <li key={subtask.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={subtask.completed || false}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      toggleSubtask(task.id, subtask.id);
+                    }}
+                    className="mr-2 rounded text-blue-500 h-3 w-3"
+                  />
+                  <span
+                    className={`text-xs ${
+                      subtask.completed ? "line-through text-gray-400" : ""
+                    }`}
+                  >
+                    {subtask.text}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            {/* Barra de progreso (solo si hay subtareas) */}
+            {(subtaskInputs[task.id]?.list || []).length > 0 &&
+              getSubtaskProgress(task.id) && (
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="flex-1 bg-gray-200 rounded-full h-1">
+                    <div
+                      className={`h-1 rounded-full ${
+                        getSubtaskProgress(task.id).percentage < 50
+                          ? "bg-red-400"
+                          : getSubtaskProgress(task.id).percentage < 80
+                          ? "bg-yellow-400"
+                          : "bg-green-500"
+                      }`}
+                      style={{
+                        width: `${getSubtaskProgress(task.id).percentage}%`,
+                      }}
+                    />
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    {getSubtaskProgress(task.id).completed}/
+                    {getSubtaskProgress(task.id).total}
+                  </span>
+                </div>
+              )}
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import TableTask from "./Task/TableTask";
 import CardTask from "./Task/CardTask";
@@ -11,17 +11,21 @@ const TaskList = ({
   setTaskToEdit,
   isMobile,
 }) => {
-  // const {
-  //   tasks,
-  //   deleteTask,
-  //   toggleComplete,
-  //   clearCompletedTasks,
-  //   setTaskToEdit,
-  //   isMobile,
-  // } = props;
   const mobileView = isMobile !== undefined ? isMobile : false;
 
-  const [subtaskInputs, setSubtaskInputs] = useState({});
+  const [subtasks, setSubtasks] = useState({});
+
+  useEffect(() => {
+    const initialState = {};
+    tasks.forEach((task) => {
+      initialState[task.id] = {
+        input: "",
+        list: task.subtasks || [],
+      };
+    });
+    setSubtasks(initialState);
+  }, [tasks]);
+
   const [expandedTasks, setExpandedTasks] = useState({});
   const [displayedPercentage, setDisplayedPercentage] = useState(0);
 
@@ -50,35 +54,48 @@ const TaskList = ({
     };
   }, [tasks]);
 
-  // Barra de progreso
-  const animationRef = useRef();
+  // barra de progreso
   useEffect(() => {
-    if (completionPercentage === displayedPercentage) return; // Evita animación si no ha cambiado
+    // asegurar porcentaje valido
+    const targetPercentage = Math.min(Math.max(completionPercentage, 0), 100);
 
-    const targetPercentage = completionPercentage;
-    const duration = 200;
+    // o anima si esta en el valor objetivo
+    if (displayedPercentage === targetPercentage) return;
+
+    // animacion
+    const duration = 300;
     const startTime = performance.now();
     const startPercentage = displayedPercentage;
+    let animationFrameId;
 
     const animate = (currentTime) => {
       const elapsedTime = currentTime - startTime;
       const progress = Math.min(elapsedTime / duration, 1);
 
-      const newPercentage =
-        startPercentage + (targetPercentage - startPercentage) * progress;
-      setDisplayedPercentage(Math.round(newPercentage));
+      const newPercentage = Math.min(
+        Math.round(
+          startPercentage + (targetPercentage - startPercentage) * progress
+        ),
+        100
+      );
+
+      setDisplayedPercentage(newPercentage);
 
       if (progress < 1) {
-        animationRef.current = requestAnimationFrame(animate);
+        animationFrameId = requestAnimationFrame(animate);
       }
     };
 
-    animationRef.current = requestAnimationFrame(animate);
+    // empieza la animacion
+    animationFrameId = requestAnimationFrame(animate);
 
+    // limpieza
     return () => {
-      cancelAnimationFrame(animationRef.current);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
     };
-  }, [completionPercentage, displayedPercentage]);
+  }, [completionPercentage]);
 
   const getPriorityColor = (priority) => {
     switch (priority) {
@@ -93,16 +110,62 @@ const TaskList = ({
   };
 
   const handleSubtaskChange = (taskId, value) => {
-    setSubtaskInputs({ ...subtaskInputs, [taskId]: value });
+    setSubtasks((prev) => ({
+      ...prev,
+      [taskId]: {
+        ...(prev[taskId] || { input: "", list: [] }), // Estructura segura
+        input: value,
+      },
+    }));
+  };
+  const handleAddSubtask = (taskId) => {
+    setSubtasks((prev) => {
+      const current = prev[taskId] || { input: "", list: [] };
+      if (!current.input.trim()) return prev;
+
+      const newSubtask = {
+        id: Date.now(),
+        text: current.input.trim(),
+        completed: false,
+      };
+
+      return {
+        ...prev,
+        [taskId]: {
+          input: "",
+          list: [...current.list, newSubtask],
+        },
+      };
+    });
   };
 
-  const handleSubtaskSubmit = (taskId) => {
-    if (subtaskInputs[taskId]?.trim()) {
-      console.log(
-        `Subtarea añadida a la tarea ${taskId}: ${subtaskInputs[taskId]}`
-      );
-      setSubtaskInputs({ ...subtaskInputs, [taskId]: "" });
-    }
+  const toggleSubtask = (taskId, subtaskId) => {
+    setSubtasks((prev) => {
+      const current = prev[taskId] || { input: "", list: [] };
+      return {
+        ...prev,
+        [taskId]: {
+          ...current,
+          list: current.list.map((subtask) =>
+            subtask.id === subtaskId
+              ? { ...subtask, completed: !subtask.completed }
+              : subtask
+          ),
+        },
+      };
+    });
+  };
+
+  // Función para calcular progreso
+  const getSubtaskProgress = (taskId) => {
+    const subtaskList = subtasks[taskId]?.list || [];
+    if (subtaskList.length === 0) return null;
+
+    const total = subtaskList.length;
+    const completed = subtaskList.filter((s) => s.completed).length;
+    const percentage = Math.round((completed / total) * 100);
+
+    return { total, completed, percentage };
   };
 
   const toggleTaskDetails = (taskId) => {
@@ -186,9 +249,11 @@ const TaskList = ({
                         deleteTask={deleteTask}
                         setTaskToEdit={setTaskToEdit}
                         expandedTasks={expandedTasks}
-                        subtaskInputs={subtaskInputs}
+                        subtaskInputs={subtasks}
                         handleSubtaskChange={handleSubtaskChange}
-                        handleSubtaskSubmit={handleSubtaskSubmit}
+                        handleAddSubtask={handleAddSubtask}
+                        toggleSubtask={toggleSubtask}
+                        getSubtaskProgress={getSubtaskProgress}
                       />
                     ))
                   ) : (
@@ -217,11 +282,13 @@ const TaskList = ({
                 toggleTaskDetails={toggleTaskDetails}
                 getPriorityColor={getPriorityColor}
                 deleteTask={deleteTask}
-                setTaskToEdit={() => handleEditTask(task)} // Llamar correctamente a handleEditTask
+                setTaskToEdit={() => handleEditTask(task)}
                 expandedTasks={expandedTasks}
-                subtaskInputs={subtaskInputs}
+                subtaskInputs={subtasks}
+                handleAddSubtask={handleAddSubtask}
                 handleSubtaskChange={handleSubtaskChange}
-                handleSubtaskSubmit={handleSubtaskSubmit}
+                toggleSubtask={toggleSubtask}
+                getSubtaskProgress={getSubtaskProgress}
               />
             ))
           ) : (

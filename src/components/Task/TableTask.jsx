@@ -17,7 +17,9 @@ const TableTask = ({
   expandedTasks,
   subtaskInputs,
   handleSubtaskChange,
-  handleSubtaskSubmit,
+  handleAddSubtask,
+  getSubtaskProgress,
+  toggleSubtask,
 }) => {
   const formatDateToDisplay = (time) => {
     if (!time) return "";
@@ -67,7 +69,7 @@ const TableTask = ({
               onClick={() => toggleTaskDetails(task.id)}
               style={{ cursor: "pointer" }}
             >
-              {handleUpperFirstLetter(task.title)}
+              {task.title}
             </span>
           </div>
         </td>
@@ -87,7 +89,6 @@ const TableTask = ({
         </td>
         <td className="p-2 text-sm">{task.time || "Sin hora"}</td>
         <td className="p-2 text-sm">
-          {" "}
           <span
             className={`px-2 py-1 rounded-full text-xs ${
               task.completed
@@ -97,13 +98,12 @@ const TableTask = ({
                 : "bg-yellow-100 text-yellow-800"
             }`}
           >
-            {" "}
             {task.completed
               ? "Completada"
               : isOverdue(task)
               ? "Vencida"
-              : "Pendiente"}{" "}
-          </span>{" "}
+              : "Pendiente"}
+          </span>
         </td>
         <td className="p-2">
           <div className="flex space-x-2">
@@ -156,32 +156,82 @@ const TableTask = ({
                   </p>
                 </div>
               )}
+
               <div className="mb-2">
                 <div className="flex items-center mb-1">
                   <input
                     type="text"
-                    value={subtaskInputs[task.id] || ""}
+                    value={subtaskInputs[task.id]?.input || ""}
                     onChange={(e) =>
                       handleSubtaskChange(task.id, e.target.value)
+                    }
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handleAddSubtask(task.id)
                     }
                     placeholder="Escribe una subtarea..."
                     className="flex-1 p-1 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                   />
                   <button
-                    onClick={() => handleSubtaskSubmit(task.id)}
+                    onClick={() => handleAddSubtask(task.id)}
                     className="ml-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-2 rounded-lg text-xs"
                   >
                     <FaPlus size={10} /> Agregar
                   </button>
                 </div>
               </div>
+
+              {/* Lista de subtareas */}
               <div>
                 <h4 className="font-medium text-gray-700 mb-1 text-sm">
-                  Subtareas:
+                  Subtareas ({(subtaskInputs[task.id]?.list || []).length}):
                 </h4>
-                <ul className="list-disc pl-5 text-xs text-gray-600">
-                  <li className="mb-1">Subtarea de ejemplo</li>
+                <ul className="space-y-1 pl-2">
+                  {(subtaskInputs[task.id]?.list || []).map((subtask) => (
+                    <li key={subtask.id} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={subtask.completed || false}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          toggleSubtask(task.id, subtask.id);
+                        }}
+                        className="mr-2 rounded text-blue-500 h-3 w-3"
+                      />
+                      <span
+                        className={`text-xs ${
+                          subtask.completed ? "line-through text-gray-400" : ""
+                        }`}
+                      >
+                        {subtask.text}
+                      </span>
+                    </li>
+                  ))}
                 </ul>
+
+                {/* Barra de progreso (solo si hay subtareas) */}
+                {(subtaskInputs[task.id]?.list || []).length > 0 &&
+                  getSubtaskProgress(task.id) && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="flex-1 bg-gray-200 rounded-full h-1">
+                        <div
+                          className={`h-1 rounded-full ${
+                            getSubtaskProgress(task.id).percentage < 50
+                              ? "bg-red-400"
+                              : getSubtaskProgress(task.id).percentage < 80
+                              ? "bg-yellow-400"
+                              : "bg-green-500"
+                          }`}
+                          style={{
+                            width: `${getSubtaskProgress(task.id).percentage}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {getSubtaskProgress(task.id).completed}/
+                        {getSubtaskProgress(task.id).total}
+                      </span>
+                    </div>
+                  )}
               </div>
             </div>
           </td>
