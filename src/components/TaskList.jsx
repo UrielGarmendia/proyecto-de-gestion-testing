@@ -49,40 +49,16 @@ const TaskList = ({
 
   // barra de progreso
   useEffect(() => {
-    const targetPercentage = Math.min(Math.max(completionPercentage, 0), 100);
+    // Animación más simple pero efectiva
+    const timer = setInterval(() => {
+      setDisplayedPercentage((prev) => {
+        const diff = completionPercentage - prev;
+        if (Math.abs(diff) < 1) return completionPercentage; // Umbral para detenerse
+        return prev + Math.sign(diff); // Aumenta/disminuye de 1 en 1
+      });
+    }, 15); // Ajusta este valor para cambiar la velocidad
 
-    if (displayedPercentage === targetPercentage) return;
-
-    const duration = 300;
-    const startTime = performance.now();
-    const startPercentage = displayedPercentage;
-    let animationFrameId;
-
-    const animate = (currentTime) => {
-      const elapsedTime = currentTime - startTime;
-      const progress = Math.min(elapsedTime / duration, 1);
-
-      const newPercentage = Math.min(
-        Math.round(
-          startPercentage + (targetPercentage - startPercentage) * progress
-        ),
-        100
-      );
-
-      setDisplayedPercentage(newPercentage);
-
-      if (progress < 1) {
-        animationFrameId = requestAnimationFrame(animate);
-      }
-    };
-
-    animationFrameId = requestAnimationFrame(animate);
-
-    return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-    };
+    return () => clearInterval(timer);
   }, [completionPercentage]);
 
   const getPriorityColor = (priority) => {
@@ -155,18 +131,23 @@ const TaskList = ({
       <div className="flex items-center gap-3">
         <div className="flex-1 bg-gray-200 rounded-full h-2">
           <div
-            className={`h-2 rounded-full transition-width duration-500 ease-in-out ${
+            className={`h-2 rounded-full ${
               completionPercentage < 50
                 ? "bg-red-400"
                 : completionPercentage < 80
                 ? "bg-yellow-400"
                 : "bg-green-500"
             }`}
-            style={{ width: `${displayedPercentage}%` }}
+            style={{
+              width: `${completionPercentage}%`,
+              transition: "width 300ms cubic-bezier(0.65, 0, 0.35, 1)",
+            }}
           />
         </div>
-
-        <span className="text-sm text-gray-600">{displayedPercentage}%</span>
+        <span className="text-sm text-gray-600">
+          {/* Muestra el porcentaje directamente */}
+          {displayedPercentage}%
+        </span>
       </div>
 
       {/* Vista en escritorio - usa una tabla */}

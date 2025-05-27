@@ -1,28 +1,34 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react"; //importo los hooks
+import { Routes, Route } from "react-router-dom"; //importo loshooks de react-router
+//importo los componentes
 import Header from "./components/Header";
 import TaskForm from "./components/TaskForm";
 import FilterButtons from "./components/FilterButton";
 import TaskList from "./components/TaskList";
+//importo las funciones de las subtareas
 import {
   subtaskChange,
   addSubtask,
   toggleSubtask,
   getSubtaskProgress,
 } from "./utils/subtaskUtils";
-
-let miStorage = window.localStorage;
+//llamo al localStorage
+const miStorage = {
+  getItem: (key) => localStorage.getItem(key),
+  setItem: (key, value) => localStorage.setItem(key, value),
+};
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [filters, setFilters] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [taskToEdit, setTaskToEdit] = useState(null); // Estado para la tarea a editar
+  const [taskToEdit, setTaskToEdit] = useState(null);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [showForm, setShowForm] = useState(true); // controla la visibilidad del formulario en el celu
+  const [showForm, setShowForm] = useState(true);
   const [subtasks, setSubtasks] = useState({});
 
-  // Detecta si es celular
+  // detecta si es celular
   useEffect(() => {
     let resizeTimeout;
 
@@ -201,80 +207,102 @@ function App() {
         toggleLogin={() => setIsLoggedIn(!isLoggedIn)}
       />
 
-      {/* Botones de navegación en celular */}
-      <div className="w-full md:hidden flex justify-center my-2">
-        <button
-          onClick={() => {
-            setShowForm(true);
-            setTimeout(() => {
-              const titleInput = document.querySelector('input[name="title"]');
-              if (titleInput) {
-                titleInput.focus({ preventScroll: true });
-              }
-            }, 100);
-          }}
-          className={`px-4 py-2 mx-1 rounded-lg ${
-            showForm ? "bg-blue-500 text-white" : "bg-gray-200"
-          }`}
-        >
-          {taskToEdit ? "Editar tarea" : "Nueva tarea"}
-        </button>
-        <button
-          onClick={toggleFormView}
-          className={`px-4 py-2 mx-1 rounded-lg ${
-            !showForm ? "bg-blue-500 text-white" : "bg-gray-200"
-          }`}
-        >
-          Ver tareas
-        </button>
-      </div>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              {/* botones de navegacion en celular */}
+              <div className="w-full md:hidden flex justify-center my-2">
+                <button
+                  onClick={() => {
+                    setShowForm(true);
+                    setTimeout(() => {
+                      const titleInput = document.querySelector(
+                        'input[name="title"]'
+                      );
+                      if (titleInput) {
+                        titleInput.focus({ preventScroll: true });
+                      }
+                    }, 100);
+                  }}
+                  className={`px-4 py-2 mx-1 rounded-lg ${
+                    showForm ? "bg-blue-500 text-white" : "bg-gray-200"
+                  }`}
+                >
+                  {taskToEdit ? "Editar tarea" : "Nueva tarea"}
+                </button>
+                <button
+                  onClick={toggleFormView}
+                  className={`px-4 py-2 mx-1 rounded-lg ${
+                    !showForm ? "bg-blue-500 text-white" : "bg-gray-200"
+                  }`}
+                >
+                  Ver tareas
+                </button>
+              </div>
 
-      <div className="w-full flex flex-col md:flex-row items-start gap-4 px-2 md:px-3">
-        {/* Formulario que aparece y desaparece en el celular */}
-        <div
-          className={`w-full md:w-1/3 ${
-            showForm ? "block" : "hidden md:block"
-          }`}
-        >
-          <div className="bg-white rounded-xl shadow-lg p-3 md:p-4 border border-gray-200 min-h-[300px] md:h-[500px] overflow-auto">
-            <TaskForm
-              addTask={addTask}
-              taskToEdit={taskToEdit}
-              handleEditTask={handleEditTask}
-              setTaskToEdit={setTaskToEdit}
-              isMobile={isMobile}
-            />
-          </div>
-        </div>
+              <div className="w-full flex flex-col md:flex-row items-start gap-4 px-2 md:px-3">
+                {/* Formulario que aparece y desaparece en el celular */}
+                <div
+                  className={`w-full md:w-1/3 ${
+                    showForm ? "block" : "hidden md:block"
+                  }`}
+                >
+                  <div className="bg-white rounded-xl shadow-lg p-3 md:p-4 border border-gray-200 min-h-[300px] md:h-[500px] overflow-auto">
+                    <TaskForm
+                      addTask={addTask}
+                      taskToEdit={taskToEdit}
+                      handleEditTask={handleEditTask}
+                      setTaskToEdit={setTaskToEdit}
+                      isMobile={isMobile}
+                    />
+                  </div>
+                </div>
 
-        {/* Lista que aparece y desaparece en el celular */}
-        <div
-          className={`flex-1 w-full ${!showForm ? "block" : "hidden md:block"}`}
-        >
-          <div className="bg-white rounded-xl min-h-[300px] md:h-[500px] shadow-lg p-3 md:p-4 border border-gray-200 overflow-auto">
-            <FilterButtons
-              filters={filters}
-              setFilters={setFilters}
-              isMobile={isMobile}
-            />
+                {/* Lista que aparece y desaparece en el celular */}
+                <div
+                  className={`flex-1 w-full ${
+                    !showForm ? "block" : "hidden md:block"
+                  }`}
+                >
+                  <div className="bg-white rounded-xl min-h-[300px] md:h-[500px] shadow-lg p-3 md:p-4 border border-gray-200 overflow-auto">
+                    <FilterButtons
+                      filters={filters}
+                      setFilters={setFilters}
+                      isMobile={isMobile}
+                    />
 
-            <TaskList
-              tasks={filteredTasks}
-              deleteTask={deleteTask}
-              toggleComplete={toggleComplete}
-              clearCompletedTasks={clearCompletedTasks}
-              setTaskToEdit={setTaskToEdit}
-              isMobile={isMobile}
-              subtasks={subtasks}
-              setSubtasks={setSubtasks}
-              handleSubtaskChange={handleSubtaskChange}
-              handleAddSubtask={handleAddSubtask}
-              toggleSubtask={handleToggleSubtask}
-              getSubtaskProgress={handleGetSubtaskProgress}
-            />
-          </div>
-        </div>
-      </div>
+                    <TaskList
+                      tasks={filteredTasks}
+                      deleteTask={deleteTask}
+                      toggleComplete={toggleComplete}
+                      clearCompletedTasks={clearCompletedTasks}
+                      setTaskToEdit={setTaskToEdit}
+                      isMobile={isMobile}
+                      subtasks={subtasks}
+                      setSubtasks={setSubtasks}
+                      handleSubtaskChange={handleSubtaskChange}
+                      handleAddSubtask={handleAddSubtask}
+                      toggleSubtask={handleToggleSubtask}
+                      getSubtaskProgress={handleGetSubtaskProgress}
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          }
+        />
+
+        {/* Commented-out route for completed tasks history */}
+        {/* <Route path="/history" element={<CompletedTasksHistory />} /> */}
+
+        {/* Commented-out route for login */}
+        {/* <Route path="/login" element={<LoginComponent />} /> */}
+
+        {/* Commented-out route for registration */}
+        {/* <Route path="/register" element={<RegisterComponent />} /> */}
+      </Routes>
     </div>
   );
 }

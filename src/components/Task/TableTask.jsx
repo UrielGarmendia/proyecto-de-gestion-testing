@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   FaChevronDown,
   FaChevronUp,
@@ -46,6 +47,30 @@ const TableTask = ({
       return !task.completed && now > taskDate;
     }
   };
+
+  const [displayedPercentage, setDisplayedPercentage] = useState(0);
+
+  const {
+    percentage: subtaskProgressPercentage = 0,
+    completed: subtaskProgressCompleted = 0,
+    total: subtaskProgressTotal = 0,
+  } = getSubtaskProgress(task.id) || {};
+
+  const isLoadingSubtasks = subtaskProgressTotal === 0;
+
+  useEffect(() => {
+    if (isLoadingSubtasks) return;
+
+    const timer = setInterval(() => {
+      setDisplayedPercentage((prev) => {
+        const diff = subtaskProgressPercentage - prev;
+        if (Math.abs(diff) < 1) return subtaskProgressPercentage;
+        return prev + Math.sign(diff);
+      });
+    }, 5);
+
+    return () => clearInterval(timer);
+  }, [subtaskProgressPercentage, isLoadingSubtasks]);
 
   return (
     <>
@@ -209,36 +234,41 @@ const TableTask = ({
                 </ul>
 
                 {/* Barra de progreso (solo si hay subtareas) */}
-                {(subtaskInputs[task.id]?.list || []).length > 0 &&
-                  getSubtaskProgress(task.id) && (
-                    <div className="mt-2">
+                {(subtaskInputs[task.id]?.list || []).length > 0 && (
+                  <div className="mt-2">
+                    {isLoadingSubtasks ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-blue-400 h-2 rounded-full animate-pulse w-1/3"></div>
+                        </div>
+                        <span className="text-xs text-gray-400">
+                          Cargando progreso...
+                        </span>
+                      </div>
+                    ) : (
                       <div className="flex items-center gap-3">
                         <div className="flex-1 bg-gray-200 rounded-full h-2">
                           <div
                             className={`h-2 rounded-full transition-all duration-500 ease-in-out ${
-                              getSubtaskProgress(task.id).percentage < 50
+                              subtaskProgressPercentage < 50
                                 ? "bg-red-400"
-                                : getSubtaskProgress(task.id).percentage < 80
+                                : subtaskProgressPercentage < 80
                                 ? "bg-yellow-400"
                                 : "bg-green-500"
                             }`}
-                            style={{
-                              width: `${
-                                getSubtaskProgress(task.id).percentage
-                              }%`,
-                            }}
+                            style={{ width: `${subtaskProgressPercentage}%` }}
                           ></div>
                         </div>
                         <span className="text-xs text-gray-600">
-                          {getSubtaskProgress(task.id).percentage}%
+                          {displayedPercentage}%
                         </span>
                         <span className="text-xs text-gray-600">
-                          {getSubtaskProgress(task.id).completed}/
-                          {getSubtaskProgress(task.id).total}
+                          {subtaskProgressCompleted}/{subtaskProgressTotal}
                         </span>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </td>
