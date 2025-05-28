@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import TaskForm from "./components/TaskForm";
 import FilterButtons from "./components/FilterButton";
 import TaskList from "./components/TaskList";
+import Achievements from "./components/Archivements";
 //importo las funciones de las subtareas
 import {
   subtaskChange,
@@ -13,12 +14,12 @@ import {
   getSubtaskProgress,
 } from "./utils/subtaskUtils";
 import CompletedTasksHistory from "./components/CompletedTasksHistory";
+import AchievementsList from "./components/AchievementsList";
 //llamo al localStorage
 const miStorage = {
   getItem: (key) => localStorage.getItem(key),
   setItem: (key, value) => localStorage.setItem(key, value),
 };
-
 function App() {
   const [tasks, setTasks] = useState([]);
   const [filters, setFilters] = useState([]);
@@ -33,12 +34,18 @@ function App() {
     taskId: null,
     taskTitle: "",
   });
+  // Nuevo estado para confirmación de reseteo de logros
+  const [resetAchievementsConfirmation, setResetAchievementsConfirmation] =
+    useState({
+      isOpen: false,
+    });
   const [taskHistory, setTaskHistory] = useState([]);
+  const [notification, setNotification] = useState(null);
+  const [unlockedAchievements, setUnlockedAchievements] = useState([]);
 
   // detecta si es celular
   useEffect(() => {
     let resizeTimeout;
-
     const handleResize = () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
@@ -48,9 +55,7 @@ function App() {
         }
       }, 200);
     };
-
     handleResize();
-
     window.addEventListener("resize", handleResize);
     return () => {
       clearTimeout(resizeTimeout);
@@ -62,11 +67,17 @@ function App() {
     const storedTasks = miStorage.getItem("tasks");
     const storedSubtasks = miStorage.getItem("subtasks");
     const storedHistory = miStorage.getItem("taskHistory");
-
+    const storedAchievements = miStorage.getItem("unlockedAchievements");
+    // Cargar logros desbloqueados si existen
+    if (storedAchievements) {
+      setUnlockedAchievements(JSON.parse(storedAchievements));
+    } else {
+      // Inicializar con array vacío (sin logros desbloqueados)
+      setUnlockedAchievements([]);
+    }
     if (storedTasks) {
       const parsedTasks = JSON.parse(storedTasks);
       setTasks(parsedTasks);
-
       // Inicializa subtareas basado en las tareas cargadas
       if (storedSubtasks) {
         const parsedSubtasks = JSON.parse(storedSubtasks);
@@ -93,32 +104,25 @@ function App() {
         setSubtasks(initialSubtasks);
       }
     }
-
     // Cargar historial si existe
     if (storedHistory) {
       setTaskHistory(JSON.parse(storedHistory));
     }
-
     setHasLoaded(true);
   }, []);
 
-  // Guarda en localStorage cuando cambian los datos - MEJORADO
+  // Guarda en localStorage cuando cambian los datos
   useEffect(() => {
     if (hasLoaded) {
       miStorage.setItem("tasks", JSON.stringify(tasks));
-
-      const subtasksToSave = {};
-      tasks.forEach((task) => {
-        if (subtasks[task.id]) {
-          subtasksToSave[task.id] = subtasks[task.id];
-        }
-      });
-      miStorage.setItem("subtasks", JSON.stringify(subtasksToSave));
-
-      // Nuevo: guardar historial
+      miStorage.setItem("subtasks", JSON.stringify(subtasks));
       miStorage.setItem("taskHistory", JSON.stringify(taskHistory));
+      miStorage.setItem(
+        "unlockedAchievements",
+        JSON.stringify(unlockedAchievements)
+      );
     }
-  }, [tasks, subtasks, taskHistory, hasLoaded]); // Añadido taskHistory a las dependencias
+  }, [tasks, subtasks, taskHistory, unlockedAchievements, hasLoaded]);
 
   // Crea la tarea
   const addTask = (newTask) => {
@@ -147,11 +151,37 @@ function App() {
     setDeleteConfirmation({ isOpen: false, taskId: null, taskTitle: "" });
   };
 
+  // Funciones para resetear logros
+  const handleResetAchievements = () => {
+    setResetAchievementsConfirmation({ isOpen: true });
+  };
+
+  const handleResetAchievementsConfirm = () => {
+    setUnlockedAchievements([]);
+    setResetAchievementsConfirmation({ isOpen: false });
+    showNotification({
+      title: "🔄 Logros reseteados",
+      message:
+        "Todos los logros han sido eliminados. ¡Puedes volver a conseguirlos!",
+      icon: "🔄",
+    });
+  };
+
+  const handleResetAchievementsCancel = () => {
+    setResetAchievementsConfirmation({ isOpen: false });
+  };
+
   // Marca la tarea como completado
   const toggleComplete = (taskId) => {
     setTasks(
       tasks.map((task) =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task
+        task.id === taskId
+          ? {
+              ...task,
+              completed: !task.completed,
+              completedAt: !task.completed ? new Date().toISOString() : null,
+            }
+          : task
       )
     );
   };
@@ -171,9 +201,8 @@ function App() {
 
   // eliminar todas las tareas
   const clearAllTasks = () => {
-    // Mover solo las tareas completadas al historial
+    // Mover las tareas completadas al historial
     const completedTasks = tasks.filter((task) => task.completed);
-
     if (completedTasks.length > 0) {
       setTaskHistory((prev) => [
         ...prev,
@@ -183,9 +212,10 @@ function App() {
         })),
       ]);
     }
-
-    // Eliminar solo las tareas completadas
-    setTasks((prev) => prev.filter((task) => !task.completed));
+    // Eliminar TODAS las tareas (tanto completadas como pendientes)
+    setTasks([]);
+    // Opcional: también limpiar las subtareas si es necesario
+    setSubtasks({});
   };
 
   //mueve a la pestaña de historial
@@ -219,23 +249,18 @@ function App() {
         const fullTime = t.time || "00:00";
         return new Date(`${t.date}T${fullTime}`);
       };
-
       const isVencida = () => {
         if (!task.date) return false;
         const taskDate = getTaskDateTime(task);
         return !task.completed && taskDate && now > taskDate;
       };
-
       const passesPriority =
         !filters.some((f) => ["baja", "media", "alta"].includes(f)) ||
         filters.includes(task.priority);
-
       const passesVencidas = !filters.includes("vencidas") || isVencida();
-
       const passesRecientes =
         !filters.includes("recent") ||
         (!task.completed && task.date && getTaskDateTime(task) >= now);
-
       return passesPriority && passesVencidas && passesRecientes;
     })
     .sort((a, b) => {
@@ -268,13 +293,22 @@ function App() {
     return getSubtaskProgress(subtasks, taskId);
   };
 
+  const showNotification = (notification) => {
+    setNotification(notification);
+    setTimeout(() => setNotification(null), 5000); // Oculta después de 5 segundos
+  };
+
+  // Función para manejar logros desbloqueados
+  const handleAchievementUnlock = (newUnlockedAchievements) => {
+    setUnlockedAchievements(newUnlockedAchievements);
+  };
+
   return (
     <div className="min-h-screen md:p-1 flex flex-col items-start bg-[#edebe6]">
       <Header
         isLoggedIn={isLoggedIn}
         toggleLogin={() => setIsLoggedIn(!isLoggedIn)}
       />
-
       <Routes>
         <Route
           path="/"
@@ -309,7 +343,6 @@ function App() {
                   Ver tareas
                 </button>
               </div>
-
               <div className="w-full flex flex-col md:flex-row items-start gap-4 px-2 md:px-3">
                 {/* Formulario que aparece y desaparece en el celular */}
                 <div
@@ -327,7 +360,6 @@ function App() {
                     />
                   </div>
                 </div>
-
                 {/* Lista que aparece y desaparece en el celular */}
                 <div
                   className={`flex-1 w-full ${
@@ -340,7 +372,6 @@ function App() {
                       setFilters={setFilters}
                       isMobile={isMobile}
                     />
-
                     <TaskList
                       tasks={filteredTasks}
                       deleteTask={deleteTask}
@@ -363,7 +394,6 @@ function App() {
             </>
           }
         />
-
         <Route
           path="/history"
           element={
@@ -374,12 +404,20 @@ function App() {
             />
           }
         />
-
+        <Route
+          path="/achievements"
+          element={
+            <AchievementsList
+              unlockedAchievements={unlockedAchievements}
+              onResetAchievements={handleResetAchievements}
+            />
+          }
+        />
         {/* <Route path="/login" element={<LoginComponent />} /> */}
-
         {/* <Route path="/register" element={<RegisterComponent />} /> */}
       </Routes>
-      {/* confirmacion de borrado */}
+
+      {/* confirmacion de borrado de tareas */}
       {deleteConfirmation.isOpen && (
         <div className="fixed inset-0 bg-[rgba(0,_0,_0,_0.600)] flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
@@ -426,6 +464,84 @@ function App() {
                 Eliminar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* confirmacion de reseteo de logros */}
+      {resetAchievementsConfirmation.isOpen && (
+        <div className="fixed inset-0 bg-[rgba(0,_0,_0,_0.600)] flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <div className="flex items-start">
+              <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-orange-100">
+                <svg
+                  className="h-6 w-6 text-orange-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                  ¿Resetear todos los logros?
+                </h3>
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500">
+                    Estás a punto de eliminar{" "}
+                    <strong>todos los logros desbloqueados</strong>. Podrás
+                    volver a conseguirlos completando las acciones
+                    correspondientes. Esta acción no se puede deshacer.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end space-x-3">
+              <button
+                onClick={handleResetAchievementsCancel}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleResetAchievementsConfirm}
+                className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+              >
+                Resetear logros
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Achievements
+        tasks={tasks}
+        taskHistory={taskHistory}
+        showNotification={showNotification}
+        unlockedAchievements={unlockedAchievements}
+        onAchievementUnlock={handleAchievementUnlock}
+      />
+
+      {notification && (
+        <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 z-50">
+          <div className="bg-white rounded-lg shadow-lg border-l-4 border-green-500 p-4 max-w-md mx-auto flex items-start gap-3 animate-fade-in-up">
+            <div className="text-2xl mt-1">{notification.icon}</div>
+            <div>
+              <h3 className="font-bold text-gray-800">{notification.title}</h3>
+              <p className="text-sm text-gray-600">{notification.message}</p>
+            </div>
+            <button
+              onClick={() => setNotification(null)}
+              className="ml-auto text-gray-400 hover:text-gray-600"
+            >
+              ×
+            </button>
           </div>
         </div>
       )}

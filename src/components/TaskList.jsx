@@ -23,6 +23,7 @@ const TaskList = ({
 
   const [expandedTasks, setExpandedTasks] = useState({});
   const [displayedPercentage, setDisplayedPercentage] = useState(0);
+  const [showClearConfirmation, setShowClearConfirmation] = useState(false);
 
   // Filtrar tareas vencidas
   const {
@@ -51,14 +52,13 @@ const TaskList = ({
 
   // barra de progreso
   useEffect(() => {
-    // Animación más simple pero efectiva
     const timer = setInterval(() => {
       setDisplayedPercentage((prev) => {
         const diff = completionPercentage - prev;
-        if (Math.abs(diff) < 1) return completionPercentage; // Umbral para detenerse
-        return prev + Math.sign(diff); // Aumenta/disminuye de 1 en 1
+        if (Math.abs(diff) < 1) return completionPercentage;
+        return prev + Math.sign(diff);
       });
-    }, 15); // Ajusta este valor para cambiar la velocidad
+    }, 15);
 
     return () => clearInterval(timer);
   }, [completionPercentage]);
@@ -84,9 +84,8 @@ const TaskList = ({
   };
 
   const handleToggleComplete = (taskId) => {
-    toggleComplete(taskId); // Llama a la función original
+    toggleComplete(taskId);
 
-    // Preservamos las subtareas al completar la tarea
     setSubtasks((prev) => {
       if (!prev[taskId]) return prev;
       return {
@@ -95,7 +94,7 @@ const TaskList = ({
           ...prev[taskId],
           list: prev[taskId].list.map((subtask) => ({
             ...subtask,
-            completed: true, // Opcional: marcar todas las subtareas como completadas
+            completed: true,
           })),
         },
       };
@@ -103,7 +102,20 @@ const TaskList = ({
   };
 
   const handleTogglePriority = (taskId) => {
-    togglePriority(taskId); // Llama a la función original
+    togglePriority(taskId);
+  };
+
+  const handleClearAll = () => {
+    setShowClearConfirmation(true);
+  };
+
+  const handleClearCancel = () => {
+    setShowClearConfirmation(false);
+  };
+
+  const handleClearConfirm = () => {
+    clearAllTasks();
+    setShowClearConfirmation(false);
   };
 
   return (
@@ -125,9 +137,7 @@ const TaskList = ({
             Vencidas: <b>{totalExpired}</b>
           </span>
           <button
-            onClick={() => {
-              clearAllTasks();
-            }}
+            onClick={handleClearAll}
             className="flex items-center gap-1 text-red-500 hover:text-red-700 text-xs sm:text-sm"
           >
             <FaTrashAlt size={12} /> Limpiar todas las tareas
@@ -152,12 +162,62 @@ const TaskList = ({
             }}
           />
         </div>
-        <span className="text-sm text-gray-600">
-          {/* Muestra el porcentaje directamente */}
-          {displayedPercentage}%
-        </span>
+        <span className="text-sm text-gray-600">{displayedPercentage}%</span>
       </div>
 
+      {/* Diálogo de confirmación */}
+      {showClearConfirmation && (
+        <div className="fixed inset-0 bg-[rgba(0,_0,_0,_0.600)] flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <div className="flex items-start">
+              <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <svg
+                  className="h-6 w-6 text-red-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                  ¿Limpiar todas las tareas?
+                </h3>
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500">
+                    Se eliminarán las tareas pendientes y las completadas se
+                    moverán al historial.
+                    <br />
+                    <strong>Esta acción no se puede deshacer.</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end space-x-3">
+              <button
+                onClick={handleClearCancel}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleClearConfirm}
+                className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Resto del componente... */}
       {/* Vista en escritorio - usa una tabla */}
       {!mobileView && (
         <div className="border border-gray-200 rounded-lg overflow-hidden">
