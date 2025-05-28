@@ -172,7 +172,7 @@ const CardTask = ({
                     className="mr-2 rounded text-blue-500 h-3 w-3"
                   />
                   <span
-                    className={`text-xs ${
+                    className={`text-sm ${
                       subtask.completed ? "line-through text-gray-400" : ""
                     }`}
                   >
@@ -201,10 +201,10 @@ const CardTask = ({
                         }}
                       ></div>
                     </div>
-                    <span className="text-xs text-gray-600">
+                    <span className="text-sm text-gray-600">
                       {getSubtaskProgress(task.id).percentage}%
                     </span>
-                    <span className="text-xs text-gray-600">
+                    <span className="text-sm text-gray-600">
                       {getSubtaskProgress(task.id).completed}/
                       {getSubtaskProgress(task.id).total}
                     </span>
@@ -219,14 +219,14 @@ const CardTask = ({
               className="text-yellow-500 hover:text-yellow-700 p-2"
               title="Editar"
             >
-              <FaEdit size={14} />
+              <FaEdit size={17} />
             </button>
             <button
               onClick={() => deleteTask(task.id)}
               className="text-red-500 hover:text-red-700 p-2"
               title="Eliminar"
             >
-              <FaTrashAlt size={14} />
+              <FaTrashAlt size={17} />
             </button>
           </div>
         </div>

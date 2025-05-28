@@ -7,7 +7,8 @@ const TaskList = ({
   tasks,
   deleteTask,
   toggleComplete,
-  clearCompletedTasks,
+  togglePriority,
+  clearAllTasks,
   setTaskToEdit,
   isMobile,
   subtasks,
@@ -16,6 +17,7 @@ const TaskList = ({
   handleAddSubtask,
   toggleSubtask,
   getSubtaskProgress,
+  moveToHistory,
 }) => {
   const mobileView = isMobile !== undefined ? isMobile : false;
 
@@ -100,6 +102,10 @@ const TaskList = ({
     });
   };
 
+  const handleTogglePriority = (taskId) => {
+    togglePriority(taskId); // Llama a la función original
+  };
+
   return (
     <div className="w-full space-y-4">
       {/* Parte con las estadísticas de tareas */}
@@ -119,10 +125,12 @@ const TaskList = ({
             Vencidas: <b>{totalExpired}</b>
           </span>
           <button
-            onClick={clearCompletedTasks}
+            onClick={() => {
+              clearAllTasks();
+            }}
             className="flex items-center gap-1 text-red-500 hover:text-red-700 text-xs sm:text-sm"
           >
-            <FaTrashAlt size={12} /> Limpiar completas
+            <FaTrashAlt size={12} /> Limpiar todas las tareas
           </button>
         </div>
       </div>
@@ -174,6 +182,7 @@ const TaskList = ({
                         key={task.id}
                         task={task}
                         toggleComplete={handleToggleComplete}
+                        togglePriority={handleTogglePriority}
                         toggleTaskDetails={toggleTaskDetails}
                         getPriorityColor={getPriorityColor}
                         deleteTask={deleteTask}
@@ -184,6 +193,7 @@ const TaskList = ({
                         handleAddSubtask={handleAddSubtask}
                         toggleSubtask={toggleSubtask}
                         getSubtaskProgress={getSubtaskProgress}
+                        moveToHistory={moveToHistory}
                       />
                     ))
                   ) : (

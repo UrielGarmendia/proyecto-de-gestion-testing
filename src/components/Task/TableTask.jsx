@@ -2,15 +2,16 @@ import { useEffect, useState } from "react";
 import {
   FaChevronDown,
   FaChevronUp,
-  FaCheck,
+  FaStar,
   FaPlus,
   FaTrashAlt,
   FaPen,
-  FaRedo,
+  FaArchive,
 } from "react-icons/fa";
 const TableTask = ({
   task,
   toggleComplete,
+  togglePriority,
   toggleTaskDetails,
   getPriorityColor,
   deleteTask,
@@ -21,6 +22,7 @@ const TableTask = ({
   handleAddSubtask,
   getSubtaskProgress,
   toggleSubtask,
+  moveToHistory,
 }) => {
   const formatDateToDisplay = (time) => {
     if (!time) return "";
@@ -133,12 +135,20 @@ const TableTask = ({
         <td className="p-2">
           <div className="flex space-x-2">
             <button
-              onClick={() => toggleComplete(task.id)}
+              onClick={() => togglePriority(task.id)}
               className="p-1 text-gray-600 hover:text-blue-600"
-              title={task.completed ? "Reabrir tarea" : "Completar tarea"}
+              title="Subir prioridad"
             >
-              {task.completed ? <FaRedo size={12} /> : <FaCheck size={12} />}
+              {task.priority !== "alta" ? (
+                <FaStar
+                  size={12}
+                  className="text-gray-600 hover:text-blue-600 cursor-pointer"
+                />
+              ) : (
+                <FaStar size={12} className="invisible" />
+              )}
             </button>
+
             <button
               onClick={() => deleteTask(task.id)}
               className="p-1 text-gray-600 hover:text-red-600"
@@ -164,6 +174,15 @@ const TableTask = ({
                 <FaChevronDown size={12} />
               )}
             </button>
+            {task.completed && (
+              <button
+                onClick={() => moveToHistory(task.id)}
+                className="p-1 text-gray-600 hover:text-red-600"
+                title="Mover al historial"
+              >
+                <FaArchive size={12} />
+              </button>
+            )}
           </div>
         </td>
       </tr>
@@ -233,7 +252,7 @@ const TableTask = ({
                   ))}
                 </ul>
 
-                {/* Barra de progreso (solo si hay subtareas) */}
+                {/* barra de progreso de subtareas */}
                 {(subtaskInputs[task.id]?.list || []).length > 0 && (
                   <div className="mt-2">
                     {isLoadingSubtasks ? (

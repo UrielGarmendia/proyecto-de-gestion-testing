@@ -12,6 +12,7 @@ import {
   toggleSubtask,
   getSubtaskProgress,
 } from "./utils/subtaskUtils";
+import CompletedTasksHistory from "./components/CompletedTasksHistory";
 //llamo al localStorage
 const miStorage = {
   getItem: (key) => localStorage.getItem(key),
@@ -27,6 +28,12 @@ function App() {
   const [isMobile, setIsMobile] = useState(false);
   const [showForm, setShowForm] = useState(true);
   const [subtasks, setSubtasks] = useState({});
+  const [deleteConfirmation, setDeleteConfirmation] = useState({
+    isOpen: false,
+    taskId: null,
+    taskTitle: "",
+  });
+  const [taskHistory, setTaskHistory] = useState([]);
 
   // detecta si es celular
   useEffect(() => {
@@ -54,6 +61,7 @@ function App() {
   useEffect(() => {
     const storedTasks = miStorage.getItem("tasks");
     const storedSubtasks = miStorage.getItem("subtasks");
+    const storedHistory = miStorage.getItem("taskHistory");
 
     if (storedTasks) {
       const parsedTasks = JSON.parse(storedTasks);
@@ -62,7 +70,6 @@ function App() {
       // Inicializa subtareas basado en las tareas cargadas
       if (storedSubtasks) {
         const parsedSubtasks = JSON.parse(storedSubtasks);
-        // Filtramos subtareas que no tengan tarea correspondiente
         const validSubtasks = {};
         parsedTasks.forEach((task) => {
           if (parsedSubtasks[task.id]) {
@@ -76,7 +83,6 @@ function App() {
         });
         setSubtasks(validSubtasks);
       } else {
-        // Si no hay subtareas guardadas, inicializar desde tareas
         const initialSubtasks = {};
         parsedTasks.forEach((task) => {
           initialSubtasks[task.id] = {
@@ -87,6 +93,12 @@ function App() {
         setSubtasks(initialSubtasks);
       }
     }
+
+    // Cargar historial si existe
+    if (storedHistory) {
+      setTaskHistory(JSON.parse(storedHistory));
+    }
+
     setHasLoaded(true);
   }, []);
 
@@ -94,7 +106,7 @@ function App() {
   useEffect(() => {
     if (hasLoaded) {
       miStorage.setItem("tasks", JSON.stringify(tasks));
-      // Guardamos solo las subtareas de tareas existentes
+
       const subtasksToSave = {};
       tasks.forEach((task) => {
         if (subtasks[task.id]) {
@@ -102,8 +114,11 @@ function App() {
         }
       });
       miStorage.setItem("subtasks", JSON.stringify(subtasksToSave));
+
+      // Nuevo: guardar historial
+      miStorage.setItem("taskHistory", JSON.stringify(taskHistory));
     }
-  }, [tasks, subtasks, hasLoaded]);
+  }, [tasks, subtasks, taskHistory, hasLoaded]); // Añadido taskHistory a las dependencias
 
   // Crea la tarea
   const addTask = (newTask) => {
@@ -115,7 +130,21 @@ function App() {
 
   // Borra la tarea
   const deleteTask = (taskId) => {
-    setTasks(tasks.filter((task) => task.id !== taskId));
+    const taskToDelete = tasks.find((task) => task.id === taskId);
+    setDeleteConfirmation({
+      isOpen: true,
+      taskId,
+      taskTitle: taskToDelete.title,
+    });
+  };
+
+  const handleDeleteConfirm = () => {
+    setTasks(tasks.filter((task) => task.id !== deleteConfirmation.taskId));
+    setDeleteConfirmation({ isOpen: false, taskId: null, taskTitle: "" });
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmation({ isOpen: false, taskId: null, taskTitle: "" });
   };
 
   // Marca la tarea como completado
@@ -127,9 +156,48 @@ function App() {
     );
   };
 
+  const togglePriority = (taskId) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === taskId ? { ...task, priority: "alta" } : task
+      )
+    );
+  };
+
   // Elimina las completas
-  const clearCompletedTasks = () => {
-    setTasks(tasks.filter((task) => !task.completed));
+  const clearHistory = () => {
+    setTaskHistory([]);
+  };
+
+  // eliminar todas las tareas
+  const clearAllTasks = () => {
+    // Mover solo las tareas completadas al historial
+    const completedTasks = tasks.filter((task) => task.completed);
+
+    if (completedTasks.length > 0) {
+      setTaskHistory((prev) => [
+        ...prev,
+        ...completedTasks.map((task) => ({
+          ...task,
+          movedAt: new Date().toISOString(),
+        })),
+      ]);
+    }
+
+    // Eliminar solo las tareas completadas
+    setTasks((prev) => prev.filter((task) => !task.completed));
+  };
+
+  //mueve a la pestaña de historial
+  const moveToHistory = (taskId) => {
+    const taskToMove = tasks.find((task) => task.id === taskId);
+    if (taskToMove) {
+      setTaskHistory((prev) => [
+        ...prev,
+        { ...taskToMove, movedAt: new Date().toISOString() },
+      ]);
+      setTasks((prev) => prev.filter((task) => task.id !== taskId));
+    }
   };
 
   // Edita las tareas
@@ -201,7 +269,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen p-2 md:p-3 flex flex-col items-start bg-[#edebe6]">
+    <div className="min-h-screen md:p-1 flex flex-col items-start bg-[#edebe6]">
       <Header
         isLoggedIn={isLoggedIn}
         toggleLogin={() => setIsLoggedIn(!isLoggedIn)}
@@ -277,7 +345,8 @@ function App() {
                       tasks={filteredTasks}
                       deleteTask={deleteTask}
                       toggleComplete={toggleComplete}
-                      clearCompletedTasks={clearCompletedTasks}
+                      togglePriority={togglePriority}
+                      clearAllTasks={clearAllTasks}
                       setTaskToEdit={setTaskToEdit}
                       isMobile={isMobile}
                       subtasks={subtasks}
@@ -286,6 +355,7 @@ function App() {
                       handleAddSubtask={handleAddSubtask}
                       toggleSubtask={handleToggleSubtask}
                       getSubtaskProgress={handleGetSubtaskProgress}
+                      moveToHistory={moveToHistory}
                     />
                   </div>
                 </div>
@@ -294,15 +364,71 @@ function App() {
           }
         />
 
-        {/* Commented-out route for completed tasks history */}
-        {/* <Route path="/history" element={<CompletedTasksHistory />} /> */}
+        <Route
+          path="/history"
+          element={
+            <CompletedTasksHistory
+              moveToHistory={moveToHistory}
+              history={taskHistory}
+              onClearHistory={clearHistory}
+            />
+          }
+        />
 
-        {/* Commented-out route for login */}
         {/* <Route path="/login" element={<LoginComponent />} /> */}
 
-        {/* Commented-out route for registration */}
         {/* <Route path="/register" element={<RegisterComponent />} /> */}
       </Routes>
+      {/* confirmacion de borrado */}
+      {deleteConfirmation.isOpen && (
+        <div className="fixed inset-0 bg-[rgba(0,_0,_0,_0.600)] flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <div className="flex items-start">
+              <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <svg
+                  className="h-6 w-6 text-red-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                  ¿Eliminar tarea?
+                </h3>
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500">
+                    Estás a punto de eliminar la tarea:{" "}
+                    <strong>"{deleteConfirmation.taskTitle}"</strong>. Esta
+                    acción no se puede deshacer.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end space-x-3">
+              <button
+                onClick={handleDeleteCancel}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
