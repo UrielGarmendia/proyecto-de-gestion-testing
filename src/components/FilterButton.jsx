@@ -1,13 +1,45 @@
 import Select from "react-select";
-// import { useState } from 'react';
+import {
+  FaArrowUp,
+  FaClock,
+  FaTrashAlt,
+  FaCircle,
+  FaExclamationCircle,
+  FaExclamationTriangle,
+} from "react-icons/fa";
 
 const FilterButtons = ({ filters, setFilters, isMobile }) => {
   const allFilters = [
-    { value: "baja", label: "Baja" },
-    { value: "media", label: "Media" },
-    { value: "alta", label: "Alta" },
-    { value: "vencidas", label: "Vencidas" },
-    { value: "recent", label: "Más reciente" },
+    {
+      value: "baja",
+      label: "Baja",
+      color: "bg-green-100 text-green-800 hover:bg-green-200",
+      icon: <FaCircle className="h-4 w-4" />,
+    },
+    {
+      value: "media",
+      label: "Media",
+      color: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+      icon: <FaExclamationCircle className="h-4 w-4" />,
+    },
+    {
+      value: "alta",
+      label: "Alta",
+      color: "bg-red-100 text-red-800 hover:bg-red-200",
+      icon: <FaExclamationTriangle className="h-4 w-4" />,
+    },
+    {
+      value: "vencidas",
+      label: "Vencidas",
+      color: "bg-purple-100 text-purple-800 hover:bg-purple-200",
+      icon: <FaClock className="h-4 w-4" />,
+    },
+    {
+      value: "recent",
+      label: "Más reciente",
+      color: "bg-blue-100 text-blue-800 hover:bg-blue-200",
+      icon: <FaArrowUp className="h-4 w-4" />,
+    },
   ];
 
   const toggleFilter = (value) => {
@@ -20,66 +52,79 @@ const FilterButtons = ({ filters, setFilters, isMobile }) => {
     setFilters([]);
   };
 
-  // Estilos personalizados para react-select
+  // Estilos personalizados para el select
   const customStyles = {
     control: (base) => ({
       ...base,
       backgroundColor: "white",
-      borderColor: "#d1d5db",
-      borderRadius: "0.5rem",
-      padding: "0.25rem",
-      boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+      borderColor: "#e5e7eb",
+      borderRadius: "0.75rem",
+      padding: "0.375rem",
+      boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
+      minHeight: "44px",
       "&:hover": {
         borderColor: "#d1d5db",
       },
       "&:focus-within": {
         borderColor: "#93c5fd",
-        boxShadow: "0 0 0 2px #bfdbfe",
+        boxShadow: "0 0 0 3px rgba(147, 197, 253, 0.5)",
       },
     }),
-    multiValue: (base) => ({
+    multiValue: (base, { data }) => ({
       ...base,
-      backgroundColor: "#3b82f6",
-      color: "white",
+      backgroundColor: data.color.split(" ")[0],
+      color: data.color.split(" ")[1],
       borderRadius: "9999px",
+      padding: "0.125rem 0.5rem",
     }),
-    multiValueLabel: (base) => ({
+    multiValueLabel: (base, { data }) => ({
       ...base,
-      color: "white",
-      fontWeight: "600",
-      padding: "0.125rem 0.375rem",
+      color: data.color.split(" ")[1],
+      fontWeight: "500",
+      fontSize: "0.875rem",
     }),
-    multiValueRemove: (base) => ({
+    multiValueRemove: (base, { data }) => ({
       ...base,
-      color: "white",
+      color: data.color.split(" ")[1],
       ":hover": {
-        backgroundColor: "#2563eb",
+        backgroundColor: "rgba(0, 0, 0, 0.1)",
       },
     }),
     menu: (base) => ({
       ...base,
-      borderRadius: "0.5rem",
-      marginTop: "0.25rem",
+      borderRadius: "0.75rem",
+      marginTop: "0.5rem",
       boxShadow:
-        "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+        "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+      zIndex: 50,
     }),
-    option: (base, { isSelected }) => ({
+    option: (base, { isSelected, isFocused, data }) => ({
       ...base,
-      backgroundColor: isSelected ? "#3b82f6" : "white",
-      color: isSelected ? "white" : "#1f2937",
-      ":hover": {
-        backgroundColor: isSelected ? "#2563eb" : "#f3f4f6",
-      },
+      backgroundColor: isSelected
+        ? data.color.split(" ")[0]
+        : isFocused
+        ? `${data.color.split(" ")[0]}50`
+        : "white",
+      color: isSelected ? data.color.split(" ")[1] : data.color.split(" ")[1],
       ":active": {
-        backgroundColor: "#3b82f6",
+        backgroundColor: data.color.split(" ")[0],
       },
+      fontSize: "0.875rem",
+      borderRadius: "0.5rem",
+      margin: "0.25rem",
+      width: "calc(100% - 0.5rem)",
+    }),
+    placeholder: (base) => ({
+      ...base,
+      color: "#9ca3af",
+      fontSize: "0.875rem",
     }),
   };
 
   return (
     <>
       {isMobile ? (
-        <div className="w-full">
+        <div className="w-full space-y-3 ">
           <Select
             isMulti
             options={allFilters}
@@ -102,35 +147,49 @@ const FilterButtons = ({ filters, setFilters, isMobile }) => {
           {filters.length > 0 && (
             <button
               onClick={clearFilters}
-              className="mt-2 px-4 py-2 w-full rounded-full bg-blue-500 text-white shadow-md hover:bg-blue-600 transition duration-300 ease-in-out text-sm font-semibold"
+              className="w-full px-4 py-2.5 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-2"
             >
+              <FaTrashAlt className="h-4 w-4" />
               Limpiar filtros
             </button>
           )}
         </div>
       ) : (
-        <div className="mb-4 flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           {allFilters.map((f) => (
             <button
               key={f.value}
               onClick={() => toggleFilter(f.value)}
-              className={`px-4 py-2 rounded-full shadow-md transition duration-300 ease-in-out text-sm font-semibold
+              className={`px-4 py-2 rounded-xl transition-all duration-200 text-sm font-medium flex items-center gap-2
                 ${
                   filters.includes(f.value)
-                    ? "bg-blue-500 text-white shadow-lg"
-                    : "bg-gray-200 hover:bg-blue-600 text-gray-700 dark:bg-gray-500 dark:text-white dark:hover:bg-gray-400"
+                    ? `${f.color.replace(
+                        "hover:",
+                        ""
+                      )} shadow-inner border border-current`
+                    : `${f.color} hover:shadow-md border border-transparent`
                 }
               `}
             >
+              <span
+                className={`${
+                  filters.includes(f.value) ? "opacity-100" : "opacity-70"
+                }`}
+              >
+                {f.icon}
+              </span>
               {f.label}
             </button>
           ))}
-          <button
-            onClick={clearFilters}
-            className="px-4 py-2 rounded-full bg-blue-500 text-white shadow-md hover:bg-blue-600 transition duration-300 ease-in-out text-sm font-semibold"
-          >
-            Limpiar filtros
-          </button>
+          {filters.length > 0 && (
+            <button
+              onClick={clearFilters}
+              className="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200 text-sm font-medium flex items-center gap-2"
+            >
+              <FaTrashAlt className="h-4 w-4" />
+              Limpiar filtros
+            </button>
+          )}
         </div>
       )}
     </>

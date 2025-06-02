@@ -10,10 +10,10 @@ const AchievementsList = ({ unlockedAchievements, onResetAchievements }) => {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
-            {/* 🏆 */}Logros
+            🏆Logros
           </h1>
 
-          {/* Botón de reseteo - solo aparece si hay logros desbloqueados */}
+          {/* boton de reseteo */}
           {unlockedAchievements.length > 0 && (
             <button
               onClick={onResetAchievements}
@@ -95,10 +95,10 @@ const AchievementsList = ({ unlockedAchievements, onResetAchievements }) => {
           })}
         </div>
 
-        {/* Estadísticas de progreso - Versión corregida */}
+        {/* estadisticas de progreso */}
         <div className="mt-8 bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            {/* 📊 */}Progreso
+            📊 Progreso
           </h2>
           <div className="grid grid-cols-4 gap-4 items-center">
             <div className="col-span-3">

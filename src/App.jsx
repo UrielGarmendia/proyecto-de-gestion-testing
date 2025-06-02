@@ -366,7 +366,7 @@ function App() {
                     !showForm ? "block" : "hidden md:block"
                   }`}
                 >
-                  <div className="bg-white rounded-xl min-h-[300px] md:h-[500px] shadow-lg p-3 md:p-4 border border-gray-200 overflow-auto">
+                  <div className="bg-white space-y-2 rounded-xl min-h-[300px] md:h-[500px] shadow-lg p-3 md:p-4 border border-gray-200 overflow-auto">
                     <FilterButtons
                       filters={filters}
                       setFilters={setFilters}

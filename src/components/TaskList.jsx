@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaClipboard, FaTrashAlt } from "react-icons/fa";
 import TableTask from "./Task/TableTask";
 import CardTask from "./Task/CardTask";
 
@@ -120,32 +120,65 @@ const TaskList = ({
 
   return (
     <div className="w-full space-y-4">
-      {/* Parte con las estadísticas de tareas */}
-      <div className="flex flex-col sm:flex-row flex-wrap justify-between items-start sm:items-center gap-3">
-        <h2 className="text-lg font-semibold">Tareas Agregadas</h2>
-        <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-          <span>
-            Creadas: <b>{totalTasks}</b>
-          </span>
-          <span className="text-green-600">
-            Completadas: <b>{totalCompleted}</b>
-          </span>
-          <span className="text-blue-600">
-            Pendientes: <b>{totalPending}</b>
-          </span>
-          <span className="text-red-600">
-            Vencidas: <b>{totalExpired}</b>
-          </span>
-          <button
-            onClick={handleClearAll}
-            className="flex items-center gap-1 text-red-500 hover:text-red-700 text-xs sm:text-sm"
-          >
-            <FaTrashAlt size={12} /> Limpiar todas las tareas
-          </button>
+      {/* estadisticas de tareas */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">
+              Resumen de Tareas
+            </h2>
+          </div>
+
+          <div className="w-full sm:w-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              {/* Tarjeta Creadas */}
+              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                <p className="text-xs font-medium text-gray-500">Creadas</p>
+                <p className="text-xl font-bold text-gray-800">{totalTasks}</p>
+              </div>
+
+              {/* Tarjeta Completadas */}
+              <div className="bg-green-50 p-3 rounded-lg border border-green-100">
+                <p className="text-xs font-medium text-green-600">
+                  Completadas
+                </p>
+                <p className="text-xl font-bold text-green-700">
+                  {totalCompleted}
+                </p>
+              </div>
+
+              {/* Tarjeta Pendientes */}
+              <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                <p className="text-xs font-medium text-blue-600">Pendientes</p>
+                <p className="text-xl font-bold text-blue-700">
+                  {totalPending}
+                </p>
+              </div>
+
+              {/* Tarjeta Vencidas */}
+              <div className="bg-red-50 p-3 rounded-lg border border-red-100">
+                <p className="text-xs font-medium text-red-600">Vencidas</p>
+                <p className="text-xl font-bold text-red-700">{totalExpired}</p>
+              </div>
+
+              {/* Botón Limpiar */}
+              <button
+                onClick={handleClearAll}
+                className="flex flex-col sm:flex-row items-center justify-center gap-1 p-3 rounded-lg border border-gray-200 hover:border-red-200 bg-white hover:bg-red-50 transition-colors"
+              >
+                <div className="flex items-center gap-1">
+                  <FaTrashAlt size={14} className="text-red-500" />
+                  <span className="text-xs font-medium text-red-600">
+                    Limpiar todo
+                  </span>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Barra que muestra progreso de completado */}
+      {/* barra progreso completado */}
       <div className="flex items-center gap-3">
         <div className="flex-1 bg-gray-200 rounded-full h-2">
           <div
@@ -165,7 +198,7 @@ const TaskList = ({
         <span className="text-sm text-gray-600">{displayedPercentage}%</span>
       </div>
 
-      {/* Diálogo de confirmación */}
+      {/* dialogo confirmacion */}
       {showClearConfirmation && (
         <div className="fixed inset-0 bg-[rgba(0,_0,_0,_0.600)] flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
@@ -217,54 +250,77 @@ const TaskList = ({
         </div>
       )}
 
-      {/* Resto del componente... */}
-      {/* Vista en escritorio - usa una tabla */}
+      {/* vista en escritorio (usa una tabla) */}
       {!mobileView && (
         <div className="border border-gray-200 rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
-            <div className="overflow-y-auto max-h-[332px]">
-              <table className="w-full">
-                <thead className="bg-gray-50 sticky top-0">
-                  <tr className="text-left text-sm text-gray-600">
-                    <th className="p-3 border-b">Tarea</th>
-                    <th className="p-3 border-b">Prioridad</th>
-                    <th className="p-3 border-b">Categoría</th>
-                    <th className="p-3 border-b">Fecha</th>
-                    <th className="p-3 border-b">Hora</th>
-                    <th className="p-3 border-b">Estado</th>
-                    <th className="p-3 border-b">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tasks.length > 0 ? (
-                    tasks.map((task) => (
-                      <TableTask
-                        key={task.id}
-                        task={task}
-                        toggleComplete={handleToggleComplete}
-                        togglePriority={handleTogglePriority}
-                        toggleTaskDetails={toggleTaskDetails}
-                        getPriorityColor={getPriorityColor}
-                        deleteTask={deleteTask}
-                        setTaskToEdit={setTaskToEdit}
-                        expandedTasks={expandedTasks}
-                        subtaskInputs={subtasks}
-                        handleSubtaskChange={handleSubtaskChange}
-                        handleAddSubtask={handleAddSubtask}
-                        toggleSubtask={toggleSubtask}
-                        getSubtaskProgress={getSubtaskProgress}
-                        moveToHistory={moveToHistory}
-                      />
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="7" className="p-4 text-center text-gray-500">
-                        No hay tareas agregadas
-                      </td>
+            <div className="h-[255px]">
+              <div className="rounded-xl overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gradient-to-r from-blue-50 to-gray-50 sticky top-0">
+                    <tr className="text-left text-sm font-medium text-gray-600">
+                      <th className="p-4 pl-6 border-b border-gray-200 font-semibold">
+                        Tarea
+                      </th>
+                      <th className="p-4 border-b border-gray-200 font-semibold">
+                        Prioridad
+                      </th>
+                      <th className="p-4 border-b border-gray-200 font-semibold">
+                        Categoría
+                      </th>
+                      <th className="p-4 border-b border-gray-200 font-semibold">
+                        Fecha
+                      </th>
+                      <th className="p-4 border-b border-gray-200 font-semibold">
+                        Hora
+                      </th>
+                      <th className="p-4 border-b border-gray-200 font-semibold">
+                        Estado
+                      </th>
+                      <th className="p-4 pr-6 border-b border-gray-200 font-semibold text-center">
+                        Acciones
+                      </th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {tasks.length > 0 ? (
+                      tasks.map((task) => (
+                        <TableTask
+                          key={task.id}
+                          task={task}
+                          toggleComplete={handleToggleComplete}
+                          togglePriority={handleTogglePriority}
+                          toggleTaskDetails={toggleTaskDetails}
+                          getPriorityColor={getPriorityColor}
+                          deleteTask={deleteTask}
+                          setTaskToEdit={setTaskToEdit}
+                          expandedTasks={expandedTasks}
+                          subtaskInputs={subtasks}
+                          handleSubtaskChange={handleSubtaskChange}
+                          handleAddSubtask={handleAddSubtask}
+                          toggleSubtask={toggleSubtask}
+                          getSubtaskProgress={getSubtaskProgress}
+                          moveToHistory={moveToHistory}
+                        />
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="7" className="p-8 text-center">
+                          <div className="flex flex-col items-center justify-center text-gray-400">
+                            <FaClipboard size={60} className="mb-1" />
+                            <h3 className="text-lg font-medium mb-1">
+                              No hay tareas
+                            </h3>
+                            <p className="text-sm max-w-md">
+                              Comienza agregando una nueva tarea
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
