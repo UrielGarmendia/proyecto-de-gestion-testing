@@ -16,6 +16,10 @@ const CompletedTasksHistory = ({ history, onClearHistory }) => {
     }
   };
 
+  const getStatusColor = () => {
+    return "bg-blue-100 text-blue-800";
+  };
+
   const handleUpperFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
@@ -32,7 +36,6 @@ const CompletedTasksHistory = ({ history, onClearHistory }) => {
 
   return (
     <div className="w-full space-y-6 p-4 md:p-6">
-      {/* Encabezado */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-3">
           <FaHistory className="text-2xl text-blue-500" />
@@ -52,19 +55,17 @@ const CompletedTasksHistory = ({ history, onClearHistory }) => {
         )}
       </div>
 
-      {/* Contenido - Vista móvil (Cards) */}
-      <div className="md:hidden space-y-3">
-        {history.length === 0 ? (
-          <div className="p-8 text-center bg-white rounded-xl border border-gray-200 shadow-sm">
-            <p className="text-gray-500 text-lg">
-              No hay tareas en el historial
-            </p>
-          </div>
-        ) : (
-          history.map((task) => (
+      {/* Lista de tareas */}
+      {history.length === 0 ? (
+        <div className="p-8 text-center bg-white rounded-xl border border-gray-200 shadow-sm">
+          <p className="text-gray-500 text-lg">No hay tareas en el historial</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {history.map((task) => (
             <div
               key={`${task.id}-${task.movedAt}`}
-              className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden transition-all hover:shadow-md"
+              className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden"
             >
               <div className="p-4">
                 <div className="flex items-start justify-between">
@@ -77,8 +78,10 @@ const CompletedTasksHistory = ({ history, onClearHistory }) => {
                       {task.category || "Sin categoría"}
                     </p>
                   </div>
-                  <span className="text-xs text-gray-500">
-                    {formatDate(task.completedAt || task.movedAt)}
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${getStatusColor()}`}
+                  >
+                    Completada
                   </span>
                 </div>
 
@@ -92,8 +95,9 @@ const CompletedTasksHistory = ({ history, onClearHistory }) => {
                       {handleUpperFirstLetter(task.priority)}
                     </span>
                   )}
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                    Completada
+
+                  <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">
+                    {formatDate(task.completedAt || task.movedAt)}
                   </span>
                 </div>
 
@@ -104,92 +108,12 @@ const CompletedTasksHistory = ({ history, onClearHistory }) => {
                 )}
               </div>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {/* Contenido - Vista desktop (Tabla) */}
-      <div className="hidden md:block bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        {history.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-gray-500 text-lg">
-              No hay tareas en el historial
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="p-4 text-left text-sm font-semibold text-gray-700">
-                    Tarea
-                  </th>
-                  <th className="p-4 text-left text-sm font-semibold text-gray-700">
-                    Categoría
-                  </th>
-                  <th className="p-4 text-left text-sm font-semibold text-gray-700">
-                    Prioridad
-                  </th>
-                  <th className="p-4 text-left text-sm font-semibold text-gray-700">
-                    Estado
-                  </th>
-                  <th className="p-4 text-left text-sm font-semibold text-gray-700">
-                    Completada
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {history.map((task) => (
-                  <tr
-                    key={`${task.id}-${task.movedAt}`}
-                    className="hover:bg-gray-50"
-                  >
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <FaCheckCircle className="text-green-500" />
-                        <span className="font-medium text-gray-800">
-                          {task.title || "Tarea sin título"}
-                        </span>
-                      </div>
-                      {task.description && (
-                        <p className="text-sm text-gray-600 mt-1">
-                          {task.description}
-                        </p>
-                      )}
-                    </td>
-                    <td className="p-4 text-gray-600">
-                      {task.category || "Sin categoría"}
-                    </td>
-                    <td className="p-4">
-                      {task.priority && (
-                        <span
-                          className={`${getPriorityColor(
-                            task.priority
-                          )} text-xs font-medium px-3 py-1 rounded-full`}
-                        >
-                          {handleUpperFirstLetter(task.priority)}
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-4">
-                      <span className="text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-                        Completada
-                      </span>
-                    </td>
-                    <td className="p-4 text-sm text-gray-500">
-                      {formatDate(task.completedAt || task.movedAt)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* Modal de confirmación */}
       {showConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-[rgba(0,_0,_0,_0.600)] flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
             <div className="flex items-start">
               <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
@@ -213,8 +137,8 @@ const CompletedTasksHistory = ({ history, onClearHistory }) => {
                 </h3>
                 <div className="mt-2">
                   <p className="text-sm text-gray-500">
-                    Estás a punto de eliminar {history.length} tareas del
-                    historial. Esta acción no se puede deshacer.
+                    Estás a punto de eliminar todo el historial de tareas
+                    completadas. Esta acción no se puede deshacer.
                   </p>
                 </div>
               </div>

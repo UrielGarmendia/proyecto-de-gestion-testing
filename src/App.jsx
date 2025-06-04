@@ -20,6 +20,8 @@ const miStorage = {
   getItem: (key) => localStorage.getItem(key),
   setItem: (key, value) => localStorage.setItem(key, value),
 };
+import WeeklySummaryPage from "./components/WeeklySummaryPage";
+
 function App() {
   const [tasks, setTasks] = useState([]);
   const [filters, setFilters] = useState([]);
@@ -412,6 +414,10 @@ function App() {
               onResetAchievements={handleResetAchievements}
             />
           }
+        />
+        <Route
+          path="/weekly-summary"
+          element={<WeeklySummaryPage tasks={tasks} />}
         />
         {/* <Route path="/login" element={<LoginComponent />} /> */}
         {/* <Route path="/register" element={<RegisterComponent />} /> */}

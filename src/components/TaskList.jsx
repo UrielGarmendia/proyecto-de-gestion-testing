@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { FaClipboard, FaTrashAlt } from "react-icons/fa";
+import { FaClipboard, FaExclamationTriangle, FaTrashAlt } from "react-icons/fa";
 import TableTask from "./Task/TableTask";
 import CardTask from "./Task/CardTask";
 
@@ -204,19 +204,7 @@ const TaskList = ({
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
             <div className="flex items-start">
               <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                <svg
-                  className="h-6 w-6 text-red-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
+                <FaExclamationTriangle className="text-red-600" size={24} />
               </div>
               <div className="ml-4">
                 <h3 className="text-lg font-medium text-gray-900">
@@ -256,8 +244,8 @@ const TaskList = ({
           <div className="overflow-x-auto">
             <div className="h-[255px]">
               <div className="rounded-xl overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gradient-to-r from-blue-50 to-gray-50 sticky top-0">
+                <table className="w-full ">
+                  <thead className="bg-gradient-to-r from-blue-50 to-gray-50 sticky top-0 bg-[#f2f2f2]">
                     <tr className="text-left text-sm font-medium text-gray-600">
                       <th className="p-4 pl-6 border-b border-gray-200 font-semibold">
                         Tarea

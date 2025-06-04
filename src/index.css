@@ -11,12 +11,18 @@
   }
 }
 
+@layer utilities {
+  .transition-max-height {
+    transition: max-height 0.4s ease-in-out;
+  }
+}
+
 .animate-fade-in-up {
   animation: fadeInUp 0.3s ease-out forwards;
 }
 
 body {
-  font-family: "Inter", sans-serif;
+  font-family: "Poppins", sans-serif;
   background-color: #edebe6;
 }
 

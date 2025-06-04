@@ -60,6 +60,14 @@ const Header = ({ isLoggedIn }) => {
           Logros
         </Link>
 
+        <Link
+          to="/weekly-summary"
+          className="text-gray-700 font-semibold transition duration-300 w-full text-center md:text-left md:w-auto hover:bg-[#50b9b5] hover:text-white py-2 px-4 rounded-lg"
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Mi Semana
+        </Link>
+
         <button className="bg-[#50b9b5] hover:bg-[#51cfc9] text-white font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#51cfc9] transition duration-300 w-full md:w-auto mt-2 md:mt-0 text-center">
           {isLoggedIn ? (
             <span className="flex items-center justify-center md:justify-start">
