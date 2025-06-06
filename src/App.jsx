@@ -21,6 +21,7 @@ const miStorage = {
   setItem: (key, value) => localStorage.setItem(key, value),
 };
 import WeeklySummaryPage from "./components/WeeklySummaryPage";
+import MateMode from "./components/MateMode";
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -419,7 +420,7 @@ function App() {
           path="/weekly-summary"
           element={<WeeklySummaryPage tasks={tasks} />}
         />
-        {/* <Route path="/login" element={<LoginComponent />} /> */}
+        <Route path="/mate-mode" element={<MateMode />} />
         {/* <Route path="/register" element={<RegisterComponent />} /> */}
       </Routes>
 

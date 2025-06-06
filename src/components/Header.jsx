@@ -6,7 +6,7 @@ const Header = ({ isLoggedIn }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <div className="relative flex flex-col md:flex-row items-center justify-between w-full mb-4 p-4 bg-white rounded-xl shadow-lg border border-gray-200">
+    <div className="relative flex flex-col md:flex-row items-center justify-between w-full mb-1 p-3 bg-white rounded-xl  border border-gray-200">
       {/* Logo y título con botón hamburguesa */}
       <div className="flex items-center w-full md:w-auto justify-between">
         <div className="flex items-center">
@@ -66,6 +66,13 @@ const Header = ({ isLoggedIn }) => {
           onClick={() => setIsMenuOpen(false)}
         >
           Mi Semana
+        </Link>
+        <Link
+          to="/mate-mode"
+          className="text-gray-700 font-semibold transition duration-300 w-full text-center md:text-left md:w-auto hover:bg-[#50b9b5] hover:text-white py-2 px-4 rounded-lg"
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Modo Mate
         </Link>
 
         <button className="bg-[#50b9b5] hover:bg-[#51cfc9] text-white font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#51cfc9] transition duration-300 w-full md:w-auto mt-2 md:mt-0 text-center">
