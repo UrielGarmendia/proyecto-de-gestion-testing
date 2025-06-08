@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FaClipboard, FaExclamationTriangle, FaTrashAlt } from "react-icons/fa";
 import TableTask from "./Task/TableTask";
 import CardTask from "./Task/CardTask";
+import TaskForm from "./TaskForm";
 
 const TaskList = ({
   tasks,
@@ -10,6 +11,7 @@ const TaskList = ({
   togglePriority,
   clearAllTasks,
   setTaskToEdit,
+  onEditClick,
   isMobile,
   subtasks,
   setSubtasks,
@@ -20,12 +22,10 @@ const TaskList = ({
   moveToHistory,
 }) => {
   const mobileView = isMobile !== undefined ? isMobile : false;
-
   const [expandedTasks, setExpandedTasks] = useState({});
   const [displayedPercentage, setDisplayedPercentage] = useState(0);
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
 
-  // Filtrar tareas vencidas
   const {
     totalTasks,
     totalCompleted,
@@ -50,7 +50,6 @@ const TaskList = ({
     };
   }, [tasks]);
 
-  // barra de progreso
   useEffect(() => {
     const timer = setInterval(() => {
       setDisplayedPercentage((prev) => {
@@ -79,13 +78,27 @@ const TaskList = ({
     setExpandedTasks({ ...expandedTasks, [taskId]: !expandedTasks[taskId] });
   };
 
-  const handleEditTask = (task) => {
+  const handleEdit = (task) => {
     setTaskToEdit(task);
+
+    // Enfocar el formulario principal después de un pequeño retraso
+    setTimeout(() => {
+      const formContainer = document.getElementById("form-container");
+      if (formContainer) {
+        formContainer.scrollIntoView({ behavior: "smooth" });
+        const titleInput = formContainer.querySelector('input[name="title"]');
+        if (titleInput) titleInput.focus();
+      }
+    }, 100);
   };
+
+  // const cancelEdit = () => {
+  //   setEditingTaskId(null);
+  //   setTaskToEdit(null);
+  // };
 
   const handleToggleComplete = (taskId) => {
     toggleComplete(taskId);
-
     setSubtasks((prev) => {
       if (!prev[taskId]) return prev;
       return {
@@ -120,7 +133,6 @@ const TaskList = ({
 
   return (
     <div className="w-full space-y-4">
-      {/* estadisticas de tareas */}
       <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -128,16 +140,12 @@ const TaskList = ({
               Resumen de Tareas
             </h2>
           </div>
-
           <div className="w-full sm:w-auto">
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              {/* Tarjeta Creadas */}
               <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
                 <p className="text-xs font-medium text-gray-500">Creadas</p>
                 <p className="text-xl font-bold text-gray-800">{totalTasks}</p>
               </div>
-
-              {/* Tarjeta Completadas */}
               <div className="bg-green-50 p-3 rounded-lg border border-green-100">
                 <p className="text-xs font-medium text-green-600">
                   Completadas
@@ -146,22 +154,16 @@ const TaskList = ({
                   {totalCompleted}
                 </p>
               </div>
-
-              {/* Tarjeta Pendientes */}
               <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
                 <p className="text-xs font-medium text-blue-600">Pendientes</p>
                 <p className="text-xl font-bold text-blue-700">
                   {totalPending}
                 </p>
               </div>
-
-              {/* Tarjeta Vencidas */}
               <div className="bg-red-50 p-3 rounded-lg border border-red-100">
                 <p className="text-xs font-medium text-red-600">Vencidas</p>
                 <p className="text-xl font-bold text-red-700">{totalExpired}</p>
               </div>
-
-              {/* Botón Limpiar */}
               <button
                 onClick={handleClearAll}
                 className="flex flex-col sm:flex-row items-center justify-center gap-1 p-3 rounded-lg border border-gray-200 hover:border-red-200 bg-white hover:bg-red-50 transition-colors"
@@ -178,7 +180,6 @@ const TaskList = ({
         </div>
       </div>
 
-      {/* barra progreso completado */}
       <div className="flex items-center gap-3">
         <div className="flex-1 bg-gray-200 rounded-full h-2">
           <div
@@ -198,7 +199,6 @@ const TaskList = ({
         <span className="text-sm text-gray-600">{displayedPercentage}%</span>
       </div>
 
-      {/* dialogo confirmacion */}
       {showClearConfirmation && (
         <div className="fixed inset-0 bg-[rgba(0,_0,_0,_0.600)] flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
@@ -238,13 +238,12 @@ const TaskList = ({
         </div>
       )}
 
-      {/* vista en escritorio (usa una tabla) */}
       {!mobileView && (
         <div className="border border-gray-200 rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
-            <div className="h-[255px]">
+            <div className="min-h-[255px]">
               <div className="rounded-xl overflow-x-auto">
-                <table className="w-full ">
+                <table className="w-full">
                   <thead className="bg-gradient-to-r from-blue-50 to-gray-50 sticky top-0 bg-[#f2f2f2]">
                     <tr className="text-left text-sm font-medium text-gray-600">
                       <th className="p-4 pl-6 border-b border-gray-200 font-semibold">
@@ -272,16 +271,16 @@ const TaskList = ({
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {tasks.length > 0 ? (
-                      tasks.map((task) => (
+                      tasks.map((task) => [
                         <TableTask
-                          key={task.id}
+                          key={`task-${task.id}`}
                           task={task}
                           toggleComplete={handleToggleComplete}
                           togglePriority={handleTogglePriority}
                           toggleTaskDetails={toggleTaskDetails}
                           getPriorityColor={getPriorityColor}
                           deleteTask={deleteTask}
-                          setTaskToEdit={setTaskToEdit}
+                          setTaskToEdit={() => handleEdit(task)}
                           expandedTasks={expandedTasks}
                           subtaskInputs={subtasks}
                           handleSubtaskChange={handleSubtaskChange}
@@ -289,8 +288,8 @@ const TaskList = ({
                           toggleSubtask={toggleSubtask}
                           getSubtaskProgress={getSubtaskProgress}
                           moveToHistory={moveToHistory}
-                        />
-                      ))
+                        />,
+                      ])
                     ) : (
                       <tr>
                         <td colSpan="7" className="p-8 text-center">
@@ -314,27 +313,26 @@ const TaskList = ({
         </div>
       )}
 
-      {/* Vista en celular - usa cards */}
       {isMobile && (
         <div className="overflow-y-auto max-h-[332px] px-1">
           {tasks.length > 0 ? (
-            tasks.map((task) => (
+            tasks.map((task) => [
               <CardTask
-                key={task.id}
+                key={`task-${task.id}`}
                 task={task}
                 toggleComplete={toggleComplete}
                 toggleTaskDetails={toggleTaskDetails}
                 getPriorityColor={getPriorityColor}
                 deleteTask={deleteTask}
-                setTaskToEdit={() => handleEditTask(task)}
+                onEditClick={onEditClick}
                 expandedTasks={expandedTasks}
                 subtaskInputs={subtasks}
                 handleAddSubtask={handleAddSubtask}
                 handleSubtaskChange={handleSubtaskChange}
                 toggleSubtask={toggleSubtask}
                 getSubtaskProgress={getSubtaskProgress}
-              />
-            ))
+              />,
+            ])
           ) : (
             <div className="p-4 text-center text-gray-500 bg-white rounded-lg shadow border border-gray-200">
               No hay tareas agregadas

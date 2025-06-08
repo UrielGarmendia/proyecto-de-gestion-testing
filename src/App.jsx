@@ -306,6 +306,11 @@ function App() {
     setUnlockedAchievements(newUnlockedAchievements);
   };
 
+  const onEditClick = (task) => {
+    setTaskToEdit(task);
+    setShowForm(true);
+  };
+
   return (
     <div className="min-h-screen md:p-1 flex flex-col items-start bg-[#edebe6]">
       <Header
@@ -390,6 +395,7 @@ function App() {
                       toggleSubtask={handleToggleSubtask}
                       getSubtaskProgress={handleGetSubtaskProgress}
                       moveToHistory={moveToHistory}
+                      onEditClick={onEditClick}
                     />
                   </div>
                 </div>

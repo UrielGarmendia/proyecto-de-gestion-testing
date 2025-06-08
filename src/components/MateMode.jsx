@@ -1,67 +1,107 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Volume2,
-  VolumeX,
-  Coffee,
-  RotateCcw,
-} from "lucide-react";
 
-// Playlist de YouTube (versión acortada para el ejemplo)
-const playlist = [
-  { id: "vlGwm4fXyIA", title: "Soy Sabalero" },
-  { id: "gg5QWSWNBpY", title: "Uriel Lozano - Mi Suegra Dice" },
-  { id: "Wukp17nvb_E", title: "No Voy a Mentirte" },
-  { id: "scLgt3NWY_I", title: "Con El No Soportas" },
-  { id: "MnpqKCx_7D8", title: "La Suavecita" },
-  { id: "gNuNdIKDzVw", title: "La Culpa La Tiene El Ron" },
-  { id: "Pqp-PHOxaZc", title: "Tú Me Obligaste" },
-  { id: "q3AlrIsy3Cg", title: "Maravillosa Esta Noche" },
-  { id: "piEk_kFOinQ", title: "Le Pido A Dios" },
-  { id: "Ia29pBuwZA8", title: "Olvídala (Single)" },
-  { id: "kMWE9pwfcak", title: "Hasta Allá en el Cielo" },
-  { id: "65_vmpxcoIA", title: "Donde Estas Corazón" },
-  { id: "0F6NLXovbj4", title: "Me las Vas a Pagar" },
-  { id: "lhM_aMimHN8", title: "Tramposa Y Mentirosa" },
-  { id: "nuBC59BovL4", title: "Mi Cumbia Santafesina" },
-  { id: "AiljVWz9398", title: "Blindado" },
-  { id: "4HcnsXL181I", title: "El Amor de Mi Vida" },
-  { id: "K0P8EhAHiUc", title: "Llorarás Más De Diez Veces" },
-  { id: "JfLdcDZCWwY", title: "Antes" },
-  { id: "vpGo0G-d--Q", title: "Qué Quiere La Chola" },
-  { id: "QD6_xEuSK_c", title: "Aunque Sea En Otra Vida" },
-  { id: "48z-glP9JCU", title: "Mientes" },
-  { id: "Ac1FOTSTtcs", title: "Como Fui a Enamorarme de Ti" },
-  { id: "TOqrtlMYYR8", title: "El Kun Agüero" },
-  { id: "6JzGEqg-S40", title: "Después De Ti" },
-  { id: "SqUmU6AGJs4", title: "Recuerdos de Mi" },
-  { id: "v3sVSnyvam0", title: "Por Siempre" },
-  { id: "u3ho6cPlKNs", title: "Iluminará" },
-  { id: "-qdjY_tTxXE", title: "Marinero" },
-  { id: "Ww7ctiM3lko", title: "Ultima Vez" },
-  { id: "Eol89G32fww", title: "Y Vete Ya" },
-  { id: "yh6zhK0k-Jo", title: "Me Es Imposible" },
-  { id: "VpqTcMjv1kw", title: "La Revancha - El Campanero" },
-  { id: "AC53FG9e1DA", title: "Amaneciendo en Ti" },
-  { id: "N8SOzx6qWJU", title: "No Te Preocupes por Mi" },
-  { id: "q-cZxRWd4Ao", title: "Un Velero Llamado Libertad" },
-  { id: "tWHxyc6Pr6s", title: "Como Has Hecho" },
-  { id: "OLvtp1BuC1w", title: "Llamala" },
-  { id: "L5PLvamkBOM", title: "Vete (En Vivo)" },
-];
+// Íconos SVG como componentes
+const PlayIcon = ({ className = "" }) => (
+  <svg
+    className={className}
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+  </svg>
+);
+
+const PauseIcon = ({ className = "" }) => (
+  <svg
+    className={className}
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="6" y="4" width="4" height="16"></rect>
+    <rect x="14" y="4" width="4" height="16"></rect>
+  </svg>
+);
+
+const Volume2Icon = ({ className = "" }) => (
+  <svg
+    className={className}
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+  </svg>
+);
+
+const VolumeXIcon = ({ className = "" }) => (
+  <svg
+    className={className}
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+    <line x1="23" y1="9" x2="17" y2="15"></line>
+    <line x1="17" y1="9" x2="23" y2="15"></line>
+  </svg>
+);
+
+const RotateCcwIcon = ({ className = "" }) => (
+  <svg
+    className={className}
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="1 4 1 10 7 10"></polyline>
+    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+  </svg>
+);
+
+const MateIcon = ({ className = "" }) => (
+  <img
+    className={className}
+    src="https://img.icons8.com/plasticine/100/mate.png"
+    alt="mate"
+  />
+);
 
 export default function MateMode() {
-  const playerRef = useRef(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(100);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [playerReady, setPlayerReady] = useState(false);
+  const [audioReady, setAudioReady] = useState(false);
 
   // Estados para estadísticas del mate
   const [mateCount, setMateCount] = useState(0);
@@ -80,156 +120,90 @@ export default function MateMode() {
     return () => clearInterval(interval);
   }, [timerActive]);
 
-  // Guardar estadísticas en localStorage
+  // Configurar eventos del audio
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("mateCount", mateCount.toString());
-      localStorage.setItem("termosCount", termosCount.toString());
-    }
-  }, [mateCount, termosCount]);
+    const audio = audioRef.current;
+    if (!audio) return;
 
-  // Cargar YouTube IFrame API
-  useEffect(() => {
-    if (typeof window !== "undefined" && !window.YT) {
-      const tag = document.createElement("script");
-      tag.src = "https://www.youtube.com/iframe_api";
-      const firstScriptTag = document.getElementsByTagName("script")[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    // Configurar la fuente del audio
+    audio.src = "/audio/cancion-1.mp3";
 
-      window.onYouTubeIframeAPIReady = () => {
-        playerRef.current = new window.YT.Player("youtube-player", {
-          height: "0",
-          width: "0",
-          events: {
-            onReady: onPlayerReady,
-            onStateChange: onPlayerStateChange,
-          },
-          playerVars: {
-            autoplay: 0,
-            controls: 0,
-            disablekb: 1,
-            fs: 0,
-            rel: 0,
-            showinfo: 0,
-            modestbranding: 1,
-          },
-        });
-      };
-    } else if (window.YT) {
-      // Si la API ya está cargada, crear el reproductor inmediatamente
-      playerRef.current = new window.YT.Player("youtube-player", {
-        height: "0",
-        width: "0",
-        events: {
-          onReady: onPlayerReady,
-          onStateChange: onPlayerStateChange,
-        },
-        playerVars: {
-          autoplay: 0,
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          rel: 0,
-          showinfo: 0,
-          modestbranding: 1,
-        },
-      });
-    }
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration);
+      setAudioReady(true);
+    };
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+    };
+
+    const handleEnded = () => {
+      audio.currentTime = 0;
+      setIsPlaying(false);
+    };
+
+    const handlePlay = () => {
+      setIsPlaying(true);
+    };
+
+    const handlePause = () => {
+      setIsPlaying(false);
+    };
+
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
 
     return () => {
-      if (playerRef.current) {
-        playerRef.current.destroy();
-      }
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
     };
   }, []);
 
-  // Cargar nueva canción cuando cambia el índice
-  useEffect(() => {
-    if (playerReady && playlist[currentIndex]) {
-      playerRef.current.loadVideoById(playlist[currentIndex].id);
-      if (isPlaying) {
-        playerRef.current.playVideo();
-      }
-    }
-  }, [currentIndex, playerReady]);
-
   // Actualizar volumen cuando cambia
   useEffect(() => {
-    if (playerReady) {
-      playerRef.current.setVolume(isMuted ? 0 : volume);
+    if (audioRef.current) {
+      audioRef.current.volume = isMuted ? 0 : volume / 100;
     }
-  }, [volume, isMuted, playerReady]);
-
-  // Actualizar tiempo actual para la barra de progreso
-  useEffect(() => {
-    let interval;
-    if (isPlaying && playerReady) {
-      interval = setInterval(() => {
-        setCurrentTime(playerRef.current.getCurrentTime());
-        setDuration(playerRef.current.getDuration());
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying, playerReady]);
-
-  const onPlayerReady = (event) => {
-    setPlayerReady(true);
-    event.target.setVolume(volume);
-    setDuration(event.target.getDuration());
-  };
-
-  const onPlayerStateChange = (event) => {
-    if (event.data === window.YT.PlayerState.ENDED) {
-      skipNext();
-    } else if (event.data === window.YT.PlayerState.PLAYING) {
-      setIsPlaying(true);
-    } else if (event.data === window.YT.PlayerState.PAUSED) {
-      setIsPlaying(false);
-    }
-  };
+  }, [volume, isMuted]);
 
   const togglePlay = () => {
-    if (!playerReady) return;
+    if (!audioRef.current) return;
 
     if (isPlaying) {
-      setIsPlaying(false);
+      audioRef.current.pause();
     } else {
-      setIsPlaying(true);
+      audioRef.current
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch((e) => console.error("Error al reproducir:", e));
     }
-  };
-
-  const skipNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % playlist.length);
-  };
-
-  const skipPrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + playlist.length) % playlist.length);
   };
 
   const handleVolumeChange = (e) => {
     const newVolume = parseInt(e.target.value);
     setVolume(newVolume);
     setIsMuted(false);
-    if (playerReady) {
-      playerRef.current.setVolume(newVolume);
-    }
   };
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
-    if (playerReady) {
-      playerRef.current.setVolume(!isMuted ? 0 : volume);
-    }
   };
 
   const handleSeek = (e) => {
-    if (!playerReady) return;
+    if (!audioRef.current) return;
     const seekTime = (e.target.value / 100) * duration;
-    playerRef.current.seekTo(seekTime, true);
+    audioRef.current.currentTime = seekTime;
     setCurrentTime(seekTime);
   };
 
   const formatTime = (time) => {
+    if (isNaN(time)) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
@@ -275,8 +249,8 @@ export default function MateMode() {
 
   return (
     <div className="w-full p-1">
-      {/* Player de YouTube (oculto) */}
-      <div id="youtube-player" style={{ display: "none" }}></div>
+      {/* Reproductor de audio oculto */}
+      <audio ref={audioRef} preload="auto" />
 
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg border border-gray-200">
         <div className="flex flex-col lg:flex-row gap-6 p-2">
@@ -284,13 +258,13 @@ export default function MateMode() {
           <div className="flex-1">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-2">
-                <Coffee className="w-6 h-6 text-[#50b9b5]" />
-                Modo Matecito 🧉
+                <MateIcon className="w-6 h-6 ml-1 text-[#8B5A2B]" />
+                <span className="flex items-center">Modo Matecito</span>
               </h2>
               <p className="text-gray-600 text-sm">Musiquita y mates</p>
             </div>
 
-            {/* Mate con imagen */}
+            {/* imagen del carpincho*/}
             <div className="text-center mb-6">
               <div
                 className="relative inline-block cursor-pointer"
@@ -298,7 +272,7 @@ export default function MateMode() {
               >
                 <div className="relative w-38 h-38 mx-auto">
                   <img
-                    src="/mate.png"
+                    src="/carpincho.png"
                     alt="Mate"
                     className="w-full h-full object-contain hover:scale-105 transition-transform duration-200"
                   />
@@ -321,7 +295,7 @@ export default function MateMode() {
                   className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-100 rounded-full"
                   title="Reiniciar mates"
                 >
-                  <RotateCcw size={12} className="text-red-500" />
+                  <RotateCcwIcon className="text-red-500" />
                 </button>
               </div>
 
@@ -335,7 +309,7 @@ export default function MateMode() {
                   className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-100 rounded-full"
                   title="Reiniciar termos"
                 >
-                  <RotateCcw size={12} className="text-red-500" />
+                  <RotateCcwIcon className="text-red-500" />
                 </button>
               </div>
 
@@ -343,7 +317,7 @@ export default function MateMode() {
                 <div className="text-2xl font-bold text-[#50b9b5]">
                   {formatMateTimer(mateTimer)}
                 </div>
-                <div className="text-sm text-gray-600">Tiempo matear</div>
+                <div className="text-sm text-gray-600">Tiempo mateando</div>
               </div>
             </div>
 
@@ -357,7 +331,7 @@ export default function MateMode() {
                     : "bg-[#50b9b5] hover:bg-[#51cfc9] text-white"
                 }`}
               >
-                {timerActive ? "Pausar Timer" : "Iniciar Timer"}
+                {timerActive ? "Pausar contador" : "Iniciar contador"}
               </button>
 
               <button
@@ -376,72 +350,60 @@ export default function MateMode() {
 
               <button
                 onClick={resetAllStats}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center"
               >
-                <RotateCcw className="w-4 h-4 inline mr-1" />
+                <RotateCcwIcon className="w-4 h-4 mr-1" />
                 Resetear Todo
               </button>
             </div>
           </div>
 
-          {/* Sección del reproductor */}
-          <div className="flex-1">
+          {/* Sección del reproductor - Centrada verticalmente */}
+          <div className="flex-1 flex flex-col justify-center">
             {/* Información de la canción actual */}
-            <div className="text-center mb-2 bg-gray-50 rounded-lg p-2">
+            <div className="text-center mb-4 bg-gray-50 rounded-lg p-4">
               <h3 className="font-semibold text-gray-800 mb-1">
                 Reproduciendo:
               </h3>
-              <p className="text-gray-700 truncate">
-                {playlist[currentIndex]?.title || "Sin título"}
-              </p>
+              <p className="text-gray-700 truncate">Enganchadito de cumbia</p>
               <div className="text-sm text-gray-500 mt-2">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </div>
             </div>
 
             {/* Barra de progreso */}
-            <div className="mb-2">
+            <div className="mb-4">
               <input
                 type="range"
                 min="0"
                 max="100"
                 value={duration ? (currentTime / duration) * 100 : 0}
                 onChange={handleSeek}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#50b9b5]"
               />
             </div>
 
             {/* Controles principales */}
-            <div className="flex justify-center items-center gap-4 mb-3">
-              <button
-                onClick={skipPrev}
-                className="bg-[#50b9b5] hover:bg-[#51cfc9] text-white p-2 rounded-full transition-colors shadow-md"
-              >
-                <SkipBack size={20} />
-              </button>
-
+            <div className="flex justify-center items-center mb-4">
               <button
                 onClick={togglePlay}
-                className="bg-[#50b9b5] hover:bg-[#51cfc9] text-white p-3 rounded-full transition-all shadow-lg transform hover:scale-105"
+                className="bg-[#50b9b5] hover:bg-[#51cfc9] text-white p-4 rounded-full transition-all shadow-lg hover:scale-105"
               >
-                {isPlaying ? <Pause size={24} /> : <Play size={24} />}
-              </button>
-
-              <button
-                onClick={skipNext}
-                className="bg-[#50b9b5] hover:bg-[#51cfc9] text-white p-2 rounded-full transition-colors shadow-md"
-              >
-                <SkipForward size={20} />
+                {isPlaying ? (
+                  <PauseIcon className="w-6 h-6" />
+                ) : (
+                  <PlayIcon className="w-6 h-6" />
+                )}
               </button>
             </div>
 
             {/* Control de volumen */}
-            <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-2 mb-2">
+            <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-3">
               <button
                 onClick={toggleMute}
                 className="text-gray-700 hover:text-[#50b9b5] transition-colors"
               >
-                {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                {isMuted ? <VolumeXIcon /> : <Volume2Icon />}
               </button>
               <input
                 type="range"
@@ -450,60 +412,15 @@ export default function MateMode() {
                 step="10"
                 value={isMuted ? 0 : volume}
                 onChange={handleVolumeChange}
-                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#50b9b5]"
               />
               <span className="text-sm text-gray-700 w-8 text-right">
                 {isMuted ? 0 : volume}%
               </span>
             </div>
-
-            {/* Lista de canciones con scroll interno */}
-            <div className="bg-gray-50 rounded-lg p-2">
-              <h4 className="font-semibold text-gray-800 mb-1 text-center text-sm">
-                Playlist de YouTube
-              </h4>
-              <div className="max-h-50 overflow-y-auto scrollbar-thin scrollbar-thumb-[#50b9b5] scrollbar-track-gray-200">
-                {playlist.map((song, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentIndex(index)}
-                    className={`w-full text-left p-2 rounded-md transition-colors text-xs ${
-                      index === currentIndex
-                        ? "bg-[#50b9b5] text-white font-medium"
-                        : "text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    <span className="truncate block">
-                      {index + 1}. {song.title}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .slider::-webkit-slider-thumb {
-          appearance: none;
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-          background: #50b9b5;
-          cursor: pointer;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        .slider::-moz-range-thumb {
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          background: #50b9b5;
-          cursor: pointer;
-          border: none;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-      `}</style>
     </div>
   );
 }
