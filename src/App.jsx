@@ -396,6 +396,7 @@ function App() {
                       getSubtaskProgress={handleGetSubtaskProgress}
                       moveToHistory={moveToHistory}
                       onEditClick={onEditClick}
+                      style={{ height: "calc(100vh - 100px)" }}
                     />
                   </div>
                 </div>

@@ -57,7 +57,7 @@ const TaskList = ({
         if (Math.abs(diff) < 1) return completionPercentage;
         return prev + Math.sign(diff);
       });
-    }, 15);
+    }, 10);
 
     return () => clearInterval(timer);
   }, [completionPercentage]);
@@ -80,8 +80,6 @@ const TaskList = ({
 
   const handleEdit = (task) => {
     setTaskToEdit(task);
-
-    // Enfocar el formulario principal después de un pequeño retraso
     setTimeout(() => {
       const formContainer = document.getElementById("form-container");
       if (formContainer) {
@@ -91,11 +89,6 @@ const TaskList = ({
       }
     }, 100);
   };
-
-  // const cancelEdit = () => {
-  //   setEditingTaskId(null);
-  //   setTaskToEdit(null);
-  // };
 
   const handleToggleComplete = (taskId) => {
     toggleComplete(taskId);
@@ -132,71 +125,83 @@ const TaskList = ({
   };
 
   return (
-    <div className="w-full space-y-4">
-      <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h2 className="text-xl font-bold text-gray-800">
-              Resumen de Tareas
-            </h2>
-          </div>
-          <div className="w-full sm:w-auto">
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                <p className="text-xs font-medium text-gray-500">Creadas</p>
-                <p className="text-xl font-bold text-gray-800">{totalTasks}</p>
-              </div>
-              <div className="bg-green-50 p-3 rounded-lg border border-green-100">
-                <p className="text-xs font-medium text-green-600">
-                  Completadas
-                </p>
-                <p className="text-xl font-bold text-green-700">
-                  {totalCompleted}
-                </p>
-              </div>
-              <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                <p className="text-xs font-medium text-blue-600">Pendientes</p>
-                <p className="text-xl font-bold text-blue-700">
-                  {totalPending}
-                </p>
-              </div>
-              <div className="bg-red-50 p-3 rounded-lg border border-red-100">
-                <p className="text-xs font-medium text-red-600">Vencidas</p>
-                <p className="text-xl font-bold text-red-700">{totalExpired}</p>
-              </div>
-              <button
-                onClick={handleClearAll}
-                className="flex flex-col sm:flex-row items-center justify-center gap-1 p-3 rounded-lg border border-gray-200 hover:border-red-200 bg-white hover:bg-red-50 transition-colors"
-              >
-                <div className="flex items-center gap-1">
-                  <FaTrashAlt size={14} className="text-red-500" />
-                  <span className="text-xs font-medium text-red-600">
-                    Limpiar todo
-                  </span>
+    <div
+      className="w-full flex flex-col"
+      style={{ height: "calc(100vh - 180px)" }}
+    >
+      {/* Sección superior sin scroll */}
+      <div className="flex-shrink-0 space-y-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">
+                Resumen de Tareas
+              </h2>
+            </div>
+            <div className="w-full sm:w-auto">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                  <p className="text-xs font-medium text-gray-500">Creadas</p>
+                  <p className="text-xl font-bold text-gray-800">
+                    {totalTasks}
+                  </p>
                 </div>
-              </button>
+                <div className="bg-green-50 p-3 rounded-lg border border-green-100">
+                  <p className="text-xs font-medium text-green-600">
+                    Completadas
+                  </p>
+                  <p className="text-xl font-bold text-green-700">
+                    {totalCompleted}
+                  </p>
+                </div>
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                  <p className="text-xs font-medium text-blue-600">
+                    Pendientes
+                  </p>
+                  <p className="text-xl font-bold text-blue-700">
+                    {totalPending}
+                  </p>
+                </div>
+                <div className="bg-red-50 p-3 rounded-lg border border-red-100">
+                  <p className="text-xs font-medium text-red-600">Vencidas</p>
+                  <p className="text-xl font-bold text-red-700">
+                    {totalExpired}
+                  </p>
+                </div>
+                <button
+                  onClick={handleClearAll}
+                  className="flex flex-col sm:flex-row items-center justify-center gap-1 p-3 rounded-lg border border-gray-200 hover:border-red-200 bg-white hover:bg-red-50 transition-colors"
+                >
+                  <div className="flex items-center gap-1">
+                    <FaTrashAlt size={14} className="text-red-500" />
+                    <span className="text-xs font-medium text-red-600">
+                      Limpiar todo
+                    </span>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex items-center gap-3">
-        <div className="flex-1 bg-gray-200 rounded-full h-2">
-          <div
-            className={`h-2 rounded-full ${
-              completionPercentage < 50
-                ? "bg-red-400"
-                : completionPercentage < 80
-                ? "bg-yellow-400"
-                : "bg-green-500"
-            }`}
-            style={{
-              width: `${completionPercentage}%`,
-              transition: "width 300ms cubic-bezier(0.65, 0, 0.35, 1)",
-            }}
-          />
+        <div className="flex items-center gap-3">
+          <div className="flex-1 bg-gray-200 rounded-full h-2">
+            <div
+              className={`h-2 rounded-full ${
+                completionPercentage < 50
+                  ? "bg-red-400"
+                  : completionPercentage < 80
+                  ? "bg-yellow-400"
+                  : "bg-green-500"
+              }`}
+              style={{
+                width: `${completionPercentage}%`,
+                transition: "width 300ms cubic-bezier(0.65, 0, 0.35, 1)",
+              }}
+            />
+          </div>
+          <span className="text-sm text-gray-600">{displayedPercentage}%</span>
         </div>
-        <span className="text-sm text-gray-600">{displayedPercentage}%</span>
       </div>
 
       {showClearConfirmation && (
@@ -238,12 +243,13 @@ const TaskList = ({
         </div>
       )}
 
+      {/* Contenedor de la tabla con scroll */}
       {!mobileView && (
-        <div className="border border-gray-200 rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <div className="min-h-[255px]">
-              <div className="rounded-xl overflow-x-auto">
-                <table className="w-full">
+        <div className="flex-grow border border-gray-200 rounded-lg overflow-hidden mt-4">
+          <div className="h-full flex flex-col">
+            <div className="overflow-x-auto">
+              <div className="min-h-[100px] h-full overflow-y-auto">
+                <table className="w-full h-full">
                   <thead className="bg-gradient-to-r from-blue-50 to-gray-50 sticky top-0 bg-[#f2f2f2]">
                     <tr className="text-left text-sm font-medium text-gray-600">
                       <th className="p-4 pl-6 border-b border-gray-200 font-semibold">
@@ -314,7 +320,7 @@ const TaskList = ({
       )}
 
       {isMobile && (
-        <div className="overflow-y-auto max-h-[332px] px-1">
+        <div className="flex-grow  px-1 mt-4">
           {tasks.length > 0 ? (
             tasks.map((task) => [
               <CardTask

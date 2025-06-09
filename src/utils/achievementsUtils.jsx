@@ -12,7 +12,7 @@ import {
 const achievementsConfig = [
   {
     id: "first_task",
-    title: "¡Primer paso!",
+    title: "Por algo se empieza",
     description: "Completaste tu primera tarea",
     icon: <FaCheckCircle />,
     condition: (stats) => stats.totalCompleted >= 1,
@@ -20,7 +20,7 @@ const achievementsConfig = [
   },
   {
     id: "five_tasks",
-    title: "¡En racha!",
+    title: "Rachita",
     description: "Completaste 5 tareas",
     icon: <FaFire />,
     condition: (stats) => stats.totalCompleted >= 5,
@@ -28,7 +28,7 @@ const achievementsConfig = [
   },
   {
     id: "ten_tasks",
-    title: "¡Experto en productividad!",
+    title: "Flama 🔥",
     description: "Completaste 10 tareas",
     icon: <FaTrophy />,
     condition: (stats) => stats.totalCompleted >= 10,
@@ -36,7 +36,7 @@ const achievementsConfig = [
   },
   {
     id: "all_tasks_week",
-    title: "¡Semana perfecta!",
+    title: "Semanita productiva",
     description: "Completaste todas las tareas de esta semana",
     icon: <FaCalendarCheck />,
     condition: (stats) =>
@@ -45,7 +45,7 @@ const achievementsConfig = [
   },
   {
     id: "high_priority",
-    title: "¡Prioridades claras!",
+    title: "Prioridades claras",
     description: "Completaste 3 tareas de alta prioridad",
     icon: <FaStar />,
     condition: (stats) => stats.highPriorityCompleted >= 3,
@@ -53,7 +53,7 @@ const achievementsConfig = [
   },
   {
     id: "early_bird",
-    title: "¡Madrugador!",
+    title: "Al que madruga dios lo ayuda",
     description: "Completaste una tarea antes de las 8 AM",
     icon: <FaSun />,
     condition: (stats) => stats.earlyMorningTasks > 0,
@@ -61,7 +61,7 @@ const achievementsConfig = [
   },
   {
     id: "streak_3",
-    title: "¡Racha de 3 días!",
+    title: "Rachita de 3 días",
     description: "Completaste tareas por 3 días consecutivos",
     icon: <FaBolt />,
     condition: (stats) => stats.currentStreak >= 3,
@@ -69,7 +69,7 @@ const achievementsConfig = [
   },
   {
     id: "all_categories",
-    title: "¡Generalista!",
+    title: "Generalista",
     description: "Completaste tareas en todas las categorías",
     icon: <FaListUl />,
     condition: (stats) =>

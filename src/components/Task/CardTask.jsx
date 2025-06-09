@@ -70,7 +70,7 @@ const CardTask = ({
         if (Math.abs(diff) < 1) return subtaskProgressPercentage;
         return prev + Math.sign(diff);
       });
-    }, 5);
+    }, 3);
 
     return () => clearInterval(timer);
   }, [subtaskProgressPercentage, isLoadingSubtasks]);
@@ -221,6 +221,48 @@ const CardTask = ({
             <h4 className="font-medium text-gray-700 mb-1 text-sm">
               Subtareas ({(subtaskInputs[task.id]?.list || []).length})
             </h4>
+            {/* Barra de progreso (solo si hay subtareas) */}
+            {(subtaskInputs[task.id]?.list || []).length > 0 && (
+              <div className="mt-3">
+                {isLoadingSubtasks ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div className="bg-blue-400 h-2.5 rounded-full animate-pulse w-1/3"></div>
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      Cargando progreso...
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 bg-gray-200 rounded-full h-2.5">
+                      <div
+                        className={`h-2 rounded-full ${
+                          displayedPercentage < 50
+                            ? "bg-red-400"
+                            : displayedPercentage < 80
+                            ? "bg-yellow-400"
+                            : "bg-green-500"
+                        }`}
+                        style={{
+                          width: `${displayedPercentage}%`,
+                          transition:
+                            "width 100ms cubic-bezier(0.65, 0, 0.35, 1)",
+                        }}
+                      ></div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-700">
+                        {displayedPercentage}%
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        ({subtaskProgressCompleted}/{subtaskProgressTotal})
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             <ul className="space-y-2">
               {(subtaskInputs[task.id]?.list || []).map((subtask) => (
                 <li
@@ -250,45 +292,6 @@ const CardTask = ({
                 </li>
               ))}
             </ul>
-
-            {/* Barra de progreso (solo si hay subtareas) */}
-            {(subtaskInputs[task.id]?.list || []).length > 0 && (
-              <div className="mt-3">
-                {isLoadingSubtasks ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div className="bg-blue-400 h-2.5 rounded-full animate-pulse w-1/3"></div>
-                    </div>
-                    <span className="text-xs text-gray-500">
-                      Cargando progreso...
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className={`h-2.5 rounded-full transition-all duration-500 ease-in-out ${
-                          displayedPercentage < 50
-                            ? "bg-red-400"
-                            : displayedPercentage < 80
-                            ? "bg-yellow-400"
-                            : "bg-green-500"
-                        }`}
-                        style={{ width: `${displayedPercentage}%` }}
-                      ></div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-700">
-                        {displayedPercentage}%
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        ({subtaskProgressCompleted}/{subtaskProgressTotal})
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
 
           <div className="flex justify-end gap-2 pt-3 border-t border-gray-200">
