@@ -34,15 +34,15 @@ const achievementsConfig = [
     condition: (stats) => stats.totalCompleted >= 10,
     unlocked: false,
   },
-  {
-    id: "all_tasks_week",
-    title: "Semanita productiva",
-    description: "Completaste todas las tareas de esta semana",
-    icon: <FaCalendarCheck />,
-    condition: (stats) =>
-      stats.weeklyCompletion === 100 && stats.totalWeeklyTasks > 0,
-    unlocked: false,
-  },
+  // {
+  //   id: "all_tasks_week",
+  //   title: "Semanita productiva",
+  //   description: "Completaste todas las tareas de esta semana",
+  //   icon: <FaCalendarCheck />,
+  //   condition: (stats) =>
+  //     stats.weeklyCompletion === 100 && stats.totalWeeklyTasks > 0,
+  //   unlocked: false,
+  // },
   {
     id: "high_priority",
     title: "Prioridades claras",
@@ -51,14 +51,14 @@ const achievementsConfig = [
     condition: (stats) => stats.highPriorityCompleted >= 3,
     unlocked: false,
   },
-  {
-    id: "early_bird",
-    title: "Al que madruga dios lo ayuda",
-    description: "Completaste una tarea antes de las 8 AM",
-    icon: <FaSun />,
-    condition: (stats) => stats.earlyMorningTasks > 0,
-    unlocked: false,
-  },
+  // {
+  //   id: "early_bird",
+  //   title: "Al que madruga dios lo ayuda",
+  //   description: "Completaste una tarea antes de las 8 AM",
+  //   icon: <FaSun />,
+  //   condition: (stats) => stats.earlyMorningTasks > 0,
+  //   unlocked: false,
+  // },
   {
     id: "streak_3",
     title: "Rachita de 3 días",
