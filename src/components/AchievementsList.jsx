@@ -50,11 +50,7 @@ const AchievementsList = ({ unlockedAchievements, onResetAchievements }) => {
                 }`}
               >
                 <div className="flex items-start gap-4">
-                  <div
-                    className={`text-3xl flex-shrink-0 ${
-                      isUnlocked ? "animate-pulse" : ""
-                    }`}
-                  >
+                  <div className={"text-3xl flex-shrink-0"}>
                     {isUnlocked ? "🏆" : "🔒"}
                   </div>
                   <div className="flex-1">

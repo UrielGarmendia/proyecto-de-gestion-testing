@@ -105,11 +105,8 @@ const CardTask = ({
         </div>
         <div className="flex gap-2">
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              togglePriority(task.id);
-            }}
-            className={`p-1 rounded-full ${
+            onClick={() => togglePriority(task.id)}
+            className={`p-2 rounded-full ${
               task.priority !== "alta"
                 ? "text-gray-400 hover:text-yellow-400 hover:bg-yellow-50"
                 : "invisible"
@@ -307,7 +304,7 @@ const CardTask = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onEditClick(task); // ← ahora llamamos al wrapper
+                onEditClick(task);
               }}
               className="p-2 rounded-full text-gray-400 hover:text-blue-500 hover:bg-blue-50"
               title="Editar tarea"

@@ -323,6 +323,7 @@ const TaskList = ({
                 toggleComplete={toggleComplete}
                 toggleTaskDetails={toggleTaskDetails}
                 getPriorityColor={getPriorityColor}
+                togglePriority={handleTogglePriority}
                 deleteTask={deleteTask}
                 onEditClick={onEditClick}
                 expandedTasks={expandedTasks}

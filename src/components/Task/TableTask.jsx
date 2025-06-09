@@ -25,6 +25,7 @@ const TableTask = ({
   toggleSubtask,
   moveToHistory,
 }) => {
+  const [displayedPercentage, setDisplayedPercentage] = useState(0);
   const formatDateToDisplay = (time) => {
     if (!time) return "";
     const [year, month, day] = time.split("-");
@@ -50,8 +51,6 @@ const TableTask = ({
       return !task.completed && now > taskDate;
     }
   };
-
-  const [displayedPercentage, setDisplayedPercentage] = useState(0);
 
   const {
     percentage: subtaskProgressPercentage = 0,
