@@ -338,6 +338,7 @@ const TaskList = ({
                 handleSubtaskChange={handleSubtaskChange}
                 toggleSubtask={toggleSubtask}
                 getSubtaskProgress={getSubtaskProgress}
+                moveToHistory={moveToHistory}
               />,
             ])
           ) : (
